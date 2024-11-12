@@ -1,0 +1,12 @@
+{
+  "name": "spotcast",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npm run dev:backend & npm run dev:frontend",
+    "dev:backend": "start cmd /k \"cd backend && node ace serve --watch\"",
+    "dev:frontend": "start cmd /k \"cd frontend && flutter run -d RFCX31AKYLT\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
