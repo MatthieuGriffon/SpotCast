@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  SplashScreenState createState() => SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -31,7 +31,9 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Naviguer vers la page d'accueil après le splash screen
     Future.delayed(const Duration(seconds: 4), () {
-      Navigator.pushReplacementNamed(context, '/home');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     });
   }
 
@@ -41,6 +43,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+  // Ici, on implémente la méthode build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen>
                 child: LinearProgressIndicator(
                   value: _animation.value,
                   backgroundColor: Colors.white.withOpacity(0.5),
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
                 ),
               ),
             ],

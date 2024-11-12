@@ -22,6 +22,7 @@ flutter:
   assets:
     - assets/images/
     - assets/fonts/
+    - assets/images/realistic_sunrise.webp
 
   fonts:
     - family: Lato
