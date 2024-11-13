@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/spots': (context) => const SpotsScreen(),
         '/profile': (context) => const ProfileScreen(),
         
+        
       },
     );
   }

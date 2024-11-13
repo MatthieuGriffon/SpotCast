@@ -148,7 +148,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           // Barre de navigation personnalisée
-          // Barre de navigation personnalisée
           Positioned(
             bottom: 0,
             left: 0,
