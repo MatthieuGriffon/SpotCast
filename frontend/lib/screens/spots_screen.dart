@@ -17,42 +17,49 @@ class _SpotsScreenState extends State<SpotsScreen> {
   final List<Map<String, String>> spots = [
     {
       'name': 'Lac Tranquille',
+      'description': 'Un lac très calme pour pêcher en toute tranquillité',
       'location': 'Paris, France',
       'fishType': 'Truite, Brochet',
       'type': 'public'
     },
     {
       'name': 'Étang Secret',
+      'description': 'Un étang caché pour les amateurs de pêche',
       'location': 'Lyon, France',
       'fishType': 'Carpe',
       'type': 'private'
     },
     {
       'name': 'Rivière Amicale',
+      'description': 'Une rivière idéale pour pêcher en groupe',
       'location': 'Bordeaux, France',
       'fishType': 'Sandre, Perche',
       'type': 'group'
     },
     {
       'name': 'Canal de l\'Amitié',
+      'description': 'Un canal parfait pour pêcher entre amis',
       'location': 'Marseille, France',
       'fishType': 'Brochet, Carpe',
       'type': 'public'
     },
     {
       'name': 'Lac de Toulouse le Rose',
+      'description': 'Un lac rose pour une pêche romantique',
       'location': 'Toulouse, France',
       'fishType': 'Truite, Brochet',
       'type': 'group'
     },
     {
       'name': 'Rivière de la Liberté',
+      'description': 'Une rivière pour pêcher en toute liberté',
       'location': 'Nantes, France',
       'fishType': 'Sandre, Perche',
       'type': 'public'
     },
     {
       'name': 'Étang de la Paix',
+      'description': 'Un étang paisible pour une pêche relaxante',
       'location': 'Nice, France',
       'fishType': 'Carpe',
       'type': 'private'
@@ -101,6 +108,12 @@ class _SpotsScreenState extends State<SpotsScreen> {
       appBar: AppBar(
         title: const Text('Spots'),
         backgroundColor: const Color(0xFF1B3A57),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Poppins',
+        ),
       ),
       body: Column(
         children: [

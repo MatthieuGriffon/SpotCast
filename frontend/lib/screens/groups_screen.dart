@@ -9,7 +9,7 @@ class GroupsScreen extends StatefulWidget {
 }
 
 class _GroupsScreenState extends State<GroupsScreen> {
-  int _selectedIndex = 2; // Index pour la page "Groups"
+  final int _selectedIndex = 2; // Index pour la page "Groups"
 
   void _onItemTapped(int index) {
     switch (index) {

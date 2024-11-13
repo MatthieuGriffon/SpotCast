@@ -9,7 +9,7 @@ class EventScreen extends StatefulWidget {
 }
 
 class _EventScreenState extends State<EventScreen> {
-  int _selectedIndex = 3; // Index pour la page "Events"
+  final int _selectedIndex = 3; // Index pour la page "Events"
 
   void _onItemTapped(int index) {
     switch (index) {
