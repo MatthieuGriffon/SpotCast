@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
+import 'map_screen.dart';
 
 class SpotDetailsScreen extends StatefulWidget {
-  final Map<String, String> spot;
+  final Map<String, dynamic> spot;
 
   const SpotDetailsScreen({super.key, required this.spot});
 
@@ -165,7 +166,17 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
             // Bouton pour afficher l'emplacement sur la carte
             ElevatedButton.icon(
               onPressed: () {
-                print('Voir sur la carte');
+                // Ouvrir la page MapScreen en passant les coordonnées
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MapScreen(
+                      latitude: double.parse(spot['latitude'].toString()),
+                      longitude: double.parse(spot['longitude'].toString()),
+                      spotName: spot['name'] ?? 'Spot',
+                    ),
+                  ),
+                );
               },
               icon: const Icon(Icons.map, color: Colors.white, size: 32),
               label: const Text(
@@ -181,8 +192,8 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
             ),
           ],
