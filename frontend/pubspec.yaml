@@ -1,7 +1,6 @@
 name: frontend
-description: "A new Flutter project."
-publish_to: 'none' 
-version: 1.0.0+1
+description: A new Flutter project
+publish_to: "none"
 
 environment:
   sdk: ^3.5.4
@@ -14,7 +13,17 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  remove_alpha_ios: true # Pour supprimer l'alpha sur iOS
+  min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF" 
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
 
 flutter:
   uses-material-design: true
@@ -26,6 +35,7 @@ flutter:
     - assets/images/image_slider01.webp
     - assets/images/image_slider02.webp
     - assets/images/image_slider03.webp
+    - assets/icon/app_icon.png
 
   fonts:
     - family: Lato
@@ -47,4 +57,3 @@ flutter:
     - family: Roboto
       fonts:
         - asset: assets/fonts/Roboto-Regular.ttf
-
