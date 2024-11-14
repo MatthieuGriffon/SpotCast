@@ -22,13 +22,13 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
   // Liste temporaire pour stocker les notes pendant la session
   final List<String> _notes = [];
 
-   @override
+  @override
   void dispose() {
     _noteController.dispose();
     super.dispose();
   }
 
-   void _addNote() {
+  void _addNote() {
     final note = _noteController.text.trim();
     if (note.isNotEmpty) {
       setState(() {
@@ -37,16 +37,39 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
       });
     }
   }
-   // Fonction pour supprimer une note
+
+  // Fonction pour supprimer une note
   void _deleteNoteAt(int index) {
-    setState(() {
-      _notes.removeAt(index);
-    });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmer la suppression'),
+          content: const Text('Voulez-vous vraiment supprimer cette note ?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _notes.removeAt(index);
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text('Supprimer'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Méthode pour gérer la navigation via la barre inférieure
   void _onItemSelected(int index) {
-    if (index != 1) { // On évite de naviguer vers la même page
+    if (index != 1) {
+      // On évite de naviguer vers la même page
       Navigator.pushReplacementNamed(
         context,
         _getRouteForIndex(index),
@@ -82,7 +105,7 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
           spot['name'] ?? 'Détails du Spot',
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 16,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
           ),
@@ -130,22 +153,9 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 ),
               ),
             const SizedBox(height: 20),
-
-            // Nom du spot
-            Text(
-              spot['name'] ?? '',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            
             // Description du spot
-            Text(
-              spot['description'] ?? 'Pas de description disponible.',
-              style: const TextStyle(fontSize: 16),
-            ),
+            Text(spot['description'] ?? 'Pas de description disponible.',
+                style: const TextStyle(fontSize: 16, fontFamily: 'Lato')),
             const SizedBox(height: 20),
 
             // Emplacement du spot
@@ -156,7 +166,7 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 Expanded(
                   child: Text(
                     spot['location'] ?? 'Emplacement inconnu',
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
               ],
@@ -173,7 +183,7 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                   child: Text(
                     'Types de poissons : ${spot['fishType']}',
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -189,11 +199,11 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 const SizedBox(width: 8),
                 Text(
                   'Type : ${spot['type']}',
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 12),
                 ),
               ],
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
             // Bouton pour afficher la carte
             ElevatedButton.icon(
@@ -209,7 +219,7 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
               label: const Text(
                 'Voir sur la carte',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -219,54 +229,87 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
 
             // Section des avis
             const ReviewSection(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
 
             // Galerie de photos
             const PhotoGallery(),
             // Section pour ajouter une note
-            const Text(
-              'Ajouter une note personnelle :',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _noteController,
-              decoration: InputDecoration(
-                hintText: 'Écrivez votre note ici...',
-                border: OutlineInputBorder(
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+              child: Card(
+                color: const Color.fromARGB(0, 236, 236, 236).withOpacity(0.9),
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Ajouter une note personnelle :',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _noteController,
+                        decoration: InputDecoration(
+                          hintText: 'Écrivez votre note ici...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        maxLines:
+                            null, // Permet d'agrandir automatiquement pour le texte
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: _addNote,
+                        icon: const Icon(
+                          Icons.save,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Sauvegarder la note',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1B3A57),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              maxLines: 3,
             ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: _addNote,
-              icon: const Icon(Icons.save),
-              label: const Text('Sauvegarder la note'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1B3A57),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
-            ),
-            
+
             const SizedBox(height: 20),
-             // Affichage des notes ajoutées avec option de suppression
+
+// Affichage des notes ajoutées avec option de suppression
             if (_notes.isNotEmpty) ...[
               const Text(
                 'Vos Notes :',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -277,6 +320,8 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 itemCount: _notes.length,
                 itemBuilder: (context, index) {
                   return Card(
+                    color:
+                        const Color.fromARGB(0, 236, 236, 236).withOpacity(0.9),
                     margin: const EdgeInsets.only(bottom: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -292,10 +337,25 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 },
               ),
             ] else
-              const Text('Aucune note ajoutée pour l\'instant.'),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                child: Card(
+                  color:
+                      const Color.fromARGB(0, 236, 236, 236).withOpacity(0.9),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text(
+                      'Aucune note ajoutée pour l\'instant.',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
-        
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: 1,
