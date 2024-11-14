@@ -166,14 +166,12 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
             // Bouton pour afficher l'emplacement sur la carte
             ElevatedButton.icon(
               onPressed: () {
-                // Ouvrir la page MapScreen en passant les coordonnées
+                // Ouvrir la page MapScreen en passant toutes les informations du spot
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => MapScreen(
-                      latitude: double.parse(spot['latitude'].toString()),
-                      longitude: double.parse(spot['longitude'].toString()),
-                      spotName: spot['name'] ?? 'Spot',
+                      spot: widget.spot, // Passer l'objet spot complet
                     ),
                   ),
                 );
@@ -195,7 +193,7 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-            ),
+            )
           ],
         ),
       ),
