@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
 import 'map_screen.dart';
 import '../widgets/common/review_section.dart';
+import '../widgets/common/photo_gallery.dart';
 
 class SpotDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> spot;
@@ -197,6 +198,7 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
               ),
             ),
             const ReviewSection(),
+              const PhotoGallery(),
           ],
         ),
       ),
