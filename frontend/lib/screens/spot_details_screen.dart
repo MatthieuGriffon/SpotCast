@@ -15,29 +15,60 @@ class SpotDetailsScreen extends StatefulWidget {
 
 class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
   bool isFavorite = false;
-  int _selectedIndex = 0;
 
-  void _onItemTapped(int index) {
+  // Nouveau : TextEditingController pour la note
+  final TextEditingController _noteController = TextEditingController();
+
+  // Liste temporaire pour stocker les notes pendant la session
+  final List<String> _notes = [];
+
+   @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+   void _addNote() {
+    final note = _noteController.text.trim();
+    if (note.isNotEmpty) {
+      setState(() {
+        _notes.add(note);
+        _noteController.clear();
+      });
+    }
+  }
+   // Fonction pour supprimer une note
+  void _deleteNoteAt(int index) {
     setState(() {
-      _selectedIndex = index;
+      _notes.removeAt(index);
     });
+  }
 
+  // Méthode pour gérer la navigation via la barre inférieure
+  void _onItemSelected(int index) {
+    if (index != 1) { // On évite de naviguer vers la même page
+      Navigator.pushReplacementNamed(
+        context,
+        _getRouteForIndex(index),
+      );
+    }
+  }
+
+  // Fonction utilitaire pour récupérer la route en fonction de l'index
+  String _getRouteForIndex(int index) {
     switch (index) {
       case 0:
-        Navigator.pushNamed(context, '/home');
-        break;
+        return '/home';
       case 1:
-        Navigator.pushNamed(context, '/spots');
-        break;
+        return '/spots';
       case 2:
-        Navigator.pushNamed(context, '/groups');
-        break;
+        return '/groups';
       case 3:
-        Navigator.pushNamed(context, '/events');
-        break;
+        return '/events';
       case 4:
-        Navigator.pushNamed(context, '/profile');
-        break;
+        return '/profile';
+      default:
+        return '/home';
     }
   }
 
@@ -87,7 +118,7 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Affichage de l'image du spot
+            // Afficher l'image du spot s'il y en a une
             if (spot.containsKey('imageUrl') && spot['imageUrl']!.isNotEmpty)
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
@@ -99,7 +130,6 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 ),
               ),
             const SizedBox(height: 20),
-            
 
             // Nom du spot
             Text(
@@ -110,15 +140,15 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
               ),
             ),
             const SizedBox(height: 10),
-
-            // Description
+            
+            // Description du spot
             Text(
               spot['description'] ?? 'Pas de description disponible.',
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
 
-            // Emplacement
+            // Emplacement du spot
             Row(
               children: [
                 const Icon(Icons.location_on, color: Colors.blue),
@@ -133,7 +163,7 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Type de poissons
+            // Types de poissons disponibles
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -146,7 +176,6 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
-                    softWrap: true,
                   ),
                 ),
               ],
@@ -166,16 +195,13 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
             ),
             const SizedBox(height: 30),
 
-            // Bouton pour afficher l'emplacement sur la carte
+            // Bouton pour afficher la carte
             ElevatedButton.icon(
               onPressed: () {
-                // Ouvrir la page MapScreen en passant toutes les informations du spot
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MapScreen(
-                      spot: widget.spot, // Passer l'objet spot complet
-                    ),
+                    builder: (context) => MapScreen(spot: widget.spot),
                   ),
                 );
               },
@@ -193,19 +219,87 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
             ),
+            const SizedBox(height: 20),
+
+            // Section des avis
             const ReviewSection(),
-              const PhotoGallery(),
+            const SizedBox(height: 20),
+
+            // Galerie de photos
+            const PhotoGallery(),
+            // Section pour ajouter une note
+            const Text(
+              'Ajouter une note personnelle :',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _noteController,
+              decoration: InputDecoration(
+                hintText: 'Écrivez votre note ici...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton.icon(
+              onPressed: _addNote,
+              icon: const Icon(Icons.save),
+              label: const Text('Sauvegarder la note'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1B3A57),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+             // Affichage des notes ajoutées avec option de suppression
+            if (_notes.isNotEmpty) ...[
+              const Text(
+                'Vos Notes :',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _notes.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      title: Text(_notes[index]),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteNoteAt(index),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ] else
+              const Text('Aucune note ajoutée pour l\'instant.'),
           ],
         ),
+        
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
-        key: UniqueKey(),
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: 1,
+        onItemSelected: _onItemSelected,
       ),
     );
   }

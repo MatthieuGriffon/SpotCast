@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import '../../screens/home_screen.dart';
+import '../../screens/spots_screen.dart';
+import '../../screens/groups_screen.dart';
+import '../../screens/event_screen.dart';
+import '../../screens/profile_screen.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
   final int currentIndex;
-  final Function(int) onTap;
+  final Function(int) onItemSelected; // <- Assurez-vous que ce nom est correct
 
   const CustomBottomNavigationBar({
     super.key,
     required this.currentIndex,
-    required this.onTap,
+    required this.onItemSelected,
   });
 
   @override
@@ -16,11 +21,29 @@ class CustomBottomNavigationBar extends StatefulWidget {
 }
 
 class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
+  // Liste des pages à afficher pour chaque index
+  final List<Widget> _pages = [
+    HomeScreen(),
+    SpotsScreen(),
+    GroupsScreen(),
+    EventScreen(),
+    ProfileScreen(),
+  ];
+
+  void _handleNavigation(int index) {
+    if (index != widget.currentIndex) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => _pages[index]),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF1B3A57), // Changer la couleur de fond
+        color: Color(0xFF1B3A57),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
@@ -29,16 +52,18 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
           BoxShadow(
             color: Colors.black26,
             blurRadius: 10,
-            offset: Offset(0, -3), // Ombre vers le haut
+            offset: Offset(0, -3),
           ),
         ],
       ),
       child: BottomNavigationBar(
         currentIndex: widget.currentIndex,
-        onTap: widget.onTap,
-        backgroundColor: Colors
-            .transparent, // Couleur transparente pour voir le fond personnalisé
-        elevation: 0, // Supprimer l'ombre par défaut
+        onTap: (index) {
+          _handleNavigation(index);
+          widget.onItemSelected(index); // <- Utilisation du paramètre ici
+        },
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.grey[400],

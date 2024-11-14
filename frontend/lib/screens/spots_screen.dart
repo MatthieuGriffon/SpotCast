@@ -10,7 +10,6 @@ class SpotsScreen extends StatefulWidget {
 }
 
 class _SpotsScreenState extends State<SpotsScreen> {
-  int _selectedIndex = 1;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -21,8 +20,8 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'location': 'Paris, France',
       'fishType': 'Truite, Brochet',
       'type': 'public',
-      'latitude': 48.8566, // <- double
-      'longitude': 2.3522, // <- double
+      'latitude': 48.8566,
+      'longitude': 2.3522,
       'owner': 'User1',
     },
     {
@@ -31,8 +30,8 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'location': 'Lyon, France',
       'fishType': 'Carpe',
       'type': 'private',
-      'latitude': 45.7640, // <- double
-      'longitude': 4.8357, // <- double
+      'latitude': 45.7640,
+      'longitude': 4.8357,
       'owner': 'User2',
     },
     {
@@ -41,8 +40,8 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'location': 'Bordeaux, France',
       'fishType': 'Sandre, Perche',
       'type': 'group',
-      'latitude': 44.8378, // <- double
-    'longitude': -0.5792, // <- double
+      'latitude': 44.8378,
+      'longitude': -0.5792,
       'owner': 'User2',
     },
     {
@@ -51,8 +50,8 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'location': 'Marseille, France',
       'fishType': 'Brochet, Carpe',
       'type': 'public',
-      'latitude': 43.2965,// <- double
-      'longitude': 5.3698,// <- double
+      'latitude': 43.2965,
+      'longitude': 5.3698,
       'owner': 'User1',
     },
     {
@@ -61,8 +60,8 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'location': 'Toulouse, France',
       'fishType': 'Truite, Brochet',
       'type': 'group',
-      'latitude': 43.6045,// <- double
-      'longitude': 1.4442,// <- double
+      'latitude': 43.6045,
+      'longitude': 1.4442,
       'owner': 'User1',
     },
     {
@@ -71,8 +70,8 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'location': 'Nantes, France',
       'fishType': 'Sandre, Perche',
       'type': 'public',
-      'latitude': 47.2184,// <- double
-      'longitude': -1.5536,// <- double
+      'latitude': 47.2184,
+      'longitude': -1.5536,
       'owner': 'User2',
     },
     {
@@ -81,35 +80,11 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'location': 'Nice, France',
       'fishType': 'Carpe',
       'type': 'private',
-      'latitude': 43.7102,// <- double
-      'longitude': 7.2620,// <- double
+      'latitude': 43.7102,
+      'longitude': 7.2620,
       'owner': 'Group3',
     },
   ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushNamed(context, '/home');
-        break;
-      case 1:
-        Navigator.pushNamed(context, '/spots');
-        break;
-      case 2:
-        Navigator.pushNamed(context, '/groups');
-        break;
-      case 3:
-        Navigator.pushNamed(context, '/events');
-        break;
-      case 4:
-        Navigator.pushNamed(context, '/profile');
-        break;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,9 +95,9 @@ class _SpotsScreenState extends State<SpotsScreen> {
             spot['fishType']!
                 .toLowerCase()
                 .contains(_searchQuery.toLowerCase()) ||
-            spot['location']!.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                ))
+            spot['location']!
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()))
         .toList();
 
     return Scaffold(
@@ -158,7 +133,7 @@ class _SpotsScreenState extends State<SpotsScreen> {
             ),
           ),
 
-          // Limiter l'affichage à 3 cartes avec un défilement
+          // Afficher les spots filtrés
           Expanded(
             child: ListView.builder(
               itemCount: filteredSpots.length,
@@ -205,29 +180,36 @@ class _SpotsScreenState extends State<SpotsScreen> {
               },
             ),
           ),
-
-          // Bouton d'ajout de spot
-          Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: ElevatedButton(
-              onPressed: () {
-                print('Add Spot button clicked');
-              },
-              style: ElevatedButton.styleFrom(
-                shape: const CircleBorder(),
-                padding: const EdgeInsets.all(16),
-                backgroundColor: const Color(0xFF1B3A57),
-              ),
-              child: const Icon(Icons.add, color: Colors.white),
-            ),
-          ),
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
-        key: UniqueKey(),
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: 1,
+        onItemSelected: (index) {
+          if (index != 1) {
+            Navigator.pushReplacementNamed(
+              context,
+              _getRouteForIndex(index),
+            );
+          }
+        },
       ),
     );
+  }
+
+  String _getRouteForIndex(int index) {
+    switch (index) {
+      case 0:
+        return '/home';
+      case 1:
+        return '/spots';
+      case 2:
+        return '/groups';
+      case 3:
+        return '/events';
+      case 4:
+        return '/profile';
+      default:
+        return '/home';
+    }
   }
 }

@@ -11,23 +11,31 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final int _selectedIndex = 4; // Index pour la page "Profil"
 
-  void _onItemTapped(int index) {
+  // Méthode pour gérer la navigation via la barre inférieure
+  void _onItemSelected(int index) {
+    if (index != _selectedIndex) {
+      Navigator.pushReplacementNamed(
+        context,
+        _getRouteForIndex(index),
+      );
+    }
+  }
+
+  // Fonction utilitaire pour récupérer la route en fonction de l'index
+  String _getRouteForIndex(int index) {
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
+        return '/home';
       case 1:
-        Navigator.pushReplacementNamed(context, '/spots');
-        break;
+        return '/spots';
       case 2:
-        Navigator.pushReplacementNamed(context, '/groups');
-        break;
+        return '/groups';
       case 3:
-        Navigator.pushReplacementNamed(context, '/events');
-        break;
+        return '/events';
       case 4:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
+        return '/profile';
+      default:
+        return '/home';
     }
   }
 
@@ -36,14 +44,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profil'),
+        backgroundColor: const Color(0xFF1B3A57),
       ),
       body: const Center(
-        child: Text('Bienvenue sur la page de votre Profil'),
+        child: Text(
+          'Bienvenue sur la page de votre Profil',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+          ),
+        ),
       ),
-      // Utilisation de `bottomNavigationBar`
+      // Utilisation du `CustomBottomNavigationBar`
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        onItemSelected: _onItemSelected,
       ),
     );
   }

@@ -11,32 +11,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
+  final int _selectedIndex = 0;
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    // Gérer la navigation en fonction de l'index
-    switch (index) {
-      case 0:
-        Navigator.pushNamed(context, '/home');
-        break;
-      case 1:
-        Navigator.pushNamed(context, '/spots');
-        break;
-      case 2:
-        Navigator.pushNamed(context, '/groups');
-        break;
-      case 3:
-        Navigator.pushNamed(context, '/events');
-        break;
-      case 4:
-        Navigator.pushNamed(context, '/profile');
-        break;
-    }
-  }
   // Méthode pour gérer l'inscription
   void _handleSignUp() {
     Navigator.pushNamed(context, '/signup');
@@ -47,10 +23,38 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushNamed(context, '/login');
   }
 
+  // Méthode pour la navigation entre les pages via la barre de navigation
+  void _onItemSelected(int index) {
+    if (index != _selectedIndex) {
+      Navigator.pushReplacementNamed(
+        context,
+        _getRouteForIndex(index),
+      );
+    }
+  }
+
+  // Fonction utilitaire pour récupérer la route en fonction de l'index
+  String _getRouteForIndex(int index) {
+    switch (index) {
+      case 0:
+        return '/home';
+      case 1:
+        return '/spots';
+      case 2:
+        return '/groups';
+      case 3:
+        return '/events';
+      case 4:
+        return '/profile';
+      default:
+        return '/home';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-     final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       body: Stack(
@@ -62,9 +66,10 @@ class _HomeScreenState extends State<HomeScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          // Intégration du CustomHeader
+
+          // Intégration du CustomHeader pour les boutons "Inscription" et "Connexion"
           Positioned(
-            top: statusBarHeight + 0,
+            top: statusBarHeight,
             left: 0,
             right: 0,
             child: CustomHeader(
@@ -72,7 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
               onLogin: _handleLogin,
             ),
           ),
-          
+
+          // Contenu principal
           Positioned(
             top: statusBarHeight + 80,
             left: 20,
@@ -91,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Color(0xFF1B3A57),
                     ),
                   ),
-                  
                   const SizedBox(height: 20),
                   SizedBox(
                     width: screenWidth / 1.5,
@@ -105,57 +110,52 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  
-                  
                   const SizedBox(height: 150),
+
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: SizedBox(
+                    child: Container(
                       width: double.infinity,
-                      child: Container(
-                        padding: const EdgeInsets.all(
-                            10), // Espace interne autour du texte
-                        decoration: BoxDecoration(
-                          color: Colors.black
-                              .withOpacity(0.7), // Fond noir avec opacité
-                          borderRadius:
-                              BorderRadius.circular(12), // Coins arrondis
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0xFF9AACA9),
-                              blurRadius: 6,
-                              offset: Offset(0, 3), // Décalage ombre
-                            ),
-                          ],
-                        ),
-                        child: const Text(
-                          'Parcourez notre application',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Monsterrat',
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            // Couleur du texte en blanc
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0xFF9AACA9),
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
                           ),
+                        ],
+                      ),
+                      child: const Text(
+                        'Parcourez notre application',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Monsterrat',
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),
                   ),
+                  const SizedBox(height: 20),
                   const ImageCarousel(),
                 ],
               ),
             ),
           ),
-          // Barre de navigation personnalisée
+
+          // Barre de navigation personnalisée en bas
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: CustomBottomNavigationBar(
-              key: UniqueKey(), // Ajout d'une clé unique
+              key: UniqueKey(), // Ajout d'une clé unique pour éviter les problèmes d'état
               currentIndex: _selectedIndex,
-              onTap: _onItemTapped,
+              onItemSelected: _onItemSelected,
             ),
           ),
         ],
