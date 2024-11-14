@@ -3,6 +3,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class MapScreen extends StatefulWidget {
   final Map<String, dynamic> spot;
@@ -16,16 +18,60 @@ class MapScreen extends StatefulWidget {
   State<MapScreen> createState() => _MapScreenState();
 }
 
+const String apiKey = '898b965d06a496f870aeb23876747c22';
+
+Future<Map<String, dynamic>> fetchWeather(double latitude, double longitude) async {
+  final Uri url = Uri.parse(
+    'https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&units=metric&lang=fr&appid=$apiKey',
+  );
+
+  try {
+    final response = await http.get(url);
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to load weather data');
+    }
+  } catch (e) {
+    print('Erreur lors de la récupération des données météo: $e');
+    rethrow;
+  }
+}
+
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController mapController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
   bool isFavorite = false;
 
+  // Variables pour stocker les données météo
+  Map<String, dynamic>? weatherData;
+  bool isLoadingWeather = true;
+
   @override
   void initState() {
     super.initState();
     _checkLocationPermission();
+    _loadWeatherData();
+  }
+
+// Fonction pour récupérer la météo
+  Future<void> _loadWeatherData() async {
+    try {
+      weatherData = await fetchWeather(
+        double.parse(widget.spot['latitude'].toString()),
+        double.parse(widget.spot['longitude'].toString()),
+      );
+    } catch (e) {
+      print('Erreur lors de la récupération des données météo: $e');
+    } finally {
+      setState(() {
+        isLoadingWeather = false;
+      });
+    }
   }
 
   // Fonction pour vérifier et demander l'accès à la localisation
@@ -39,21 +85,21 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   // Fonction pour ouvrir Google Maps avec un itinéraire
-Future<void> openGoogleMaps(double latitude, double longitude) async {
-  final Uri googleMapsUrl = Uri.parse(
-    'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude&travelmode=driving',
-  );
-
-  // Utiliser `launchUrl` avec le mode approprié
-  if (await canLaunchUrl(googleMapsUrl)) {
-    await launchUrl(
-      googleMapsUrl,
-      mode: LaunchMode.externalApplication,
+  Future<void> openGoogleMaps(double latitude, double longitude) async {
+    final Uri googleMapsUrl = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude&travelmode=driving',
     );
-  } else {
-    throw Exception('Impossible d\'ouvrir Google Maps');
+
+    // Utiliser `launchUrl` avec le mode approprié
+    if (await canLaunchUrl(googleMapsUrl)) {
+      await launchUrl(
+        googleMapsUrl,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      throw Exception('Impossible d\'ouvrir Google Maps');
+    }
   }
-}
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -81,6 +127,65 @@ Future<void> openGoogleMaps(double latitude, double longitude) async {
         break;
     }
   }
+
+  // Widget pour afficher les informations météo
+ Widget buildWeatherInfo() {
+  if (isLoadingWeather) {
+    return const Center(child: CircularProgressIndicator());
+  }
+  if (weatherData == null) {
+    return const Text('Aucune donnée météo disponible');
+  }
+
+  final double temperature = weatherData!['main']['temp'];
+  final String description = weatherData!['weather'][0]['description'];
+  final String iconCode = weatherData!['weather'][0]['icon'];
+
+  return Card(
+    margin: const EdgeInsets.all(16),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    elevation: 4,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        children: [
+          Image.network(
+            'https://openweathermap.org/img/wn/$iconCode@2x.png',
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Température: ${temperature.toStringAsFixed(1)}°C',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    overflow: TextOverflow.ellipsis, // Empêcher le dépassement
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Description: ${description[0].toUpperCase()}${description.substring(1)}',
+                  style: const TextStyle(
+                    fontSize: 8,
+                    overflow: TextOverflow.ellipsis, // Empêcher le dépassement
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +312,8 @@ Future<void> openGoogleMaps(double latitude, double longitude) async {
               ),
             ),
           ),
+          // Afficher les informations météo
+          buildWeatherInfo(),
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
