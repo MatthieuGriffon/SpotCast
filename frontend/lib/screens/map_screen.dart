@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
+import '../widgets/common/weather_info_card.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -20,7 +21,8 @@ class MapScreen extends StatefulWidget {
 
 const String apiKey = '898b965d06a496f870aeb23876747c22';
 
-Future<Map<String, dynamic>> fetchWeather(double latitude, double longitude) async {
+Future<Map<String, dynamic>> fetchWeather(
+    double latitude, double longitude) async {
   final Uri url = Uri.parse(
     'https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&units=metric&lang=fr&appid=$apiKey',
   );
@@ -129,63 +131,24 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   // Widget pour afficher les informations météo
- Widget buildWeatherInfo() {
-  if (isLoadingWeather) {
-    return const Center(child: CircularProgressIndicator());
+  Widget buildWeatherSection() {
+    if (isLoadingWeather) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (weatherData == null) {
+      return const Text('Aucune donnée météo disponible');
+    }
+
+    final double temperature = weatherData!['main']['temp'];
+    final String description = weatherData!['weather'][0]['description'];
+    final String iconCode = weatherData!['weather'][0]['icon'];
+
+    return WeatherInfoCard(
+      temperature: temperature,
+      description: description,
+      iconCode: iconCode,
+    );
   }
-  if (weatherData == null) {
-    return const Text('Aucune donnée météo disponible');
-  }
-
-  final double temperature = weatherData!['main']['temp'];
-  final String description = weatherData!['weather'][0]['description'];
-  final String iconCode = weatherData!['weather'][0]['icon'];
-
-  return Card(
-    margin: const EdgeInsets.all(16),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    elevation: 4,
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          Image.network(
-            'https://openweathermap.org/img/wn/$iconCode@2x.png',
-            width: 50,
-            height: 50,
-            fit: BoxFit.cover,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Température: ${temperature.toStringAsFixed(1)}°C',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    overflow: TextOverflow.ellipsis, // Empêcher le dépassement
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Description: ${description[0].toUpperCase()}${description.substring(1)}',
-                  style: const TextStyle(
-                    fontSize: 8,
-                    overflow: TextOverflow.ellipsis, // Empêcher le dépassement
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +223,8 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
           ),
-
+          // Afficher les informations météo
+          buildWeatherSection(),
           // Bouton pour ouvrir le Drawer en dessous de la carte
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -313,7 +277,6 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
           // Afficher les informations météo
-          buildWeatherInfo(),
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(

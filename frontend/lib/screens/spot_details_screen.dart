@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
 import 'map_screen.dart';
+import '../widgets/common/review_section.dart';
 
 class SpotDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> spot;
@@ -97,6 +98,7 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 ),
               ),
             const SizedBox(height: 20),
+            
 
             // Nom du spot
             Text(
@@ -193,7 +195,8 @@ class _SpotDetailsScreenState extends State<SpotDetailsScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-            )
+            ),
+            const ReviewSection(),
           ],
         ),
       ),
