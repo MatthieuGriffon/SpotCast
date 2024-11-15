@@ -124,11 +124,60 @@ class _SpotsScreenState extends State<SpotsScreen> {
                 });
               },
               decoration: InputDecoration(
+                labelStyle: const TextStyle(
+                  color: Color.fromARGB(255, 0, 0, 0),
+                ),
                 labelText: 'Rechercher un spot',
+                hintText: 'Nom, type de poisson, localisation...',
+                prefixIcon: const Icon(Icons.search),
+
+                // Bordure par défaut
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color.fromARGB(
+                        255, 200, 200, 200), // Couleur par défaut
+                    width: 1,
+                  ),
                 ),
-                prefixIcon: const Icon(Icons.search),
+
+                // Bordure quand le champ est activé (mais pas encore focus)
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color.fromARGB(
+                        255, 27, 58, 87), // Couleur personnalisée
+                    width: 1.5,
+                  ),
+                ),
+
+                // Bordure quand le champ est en focus
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color.fromARGB(
+                        255, 0, 123, 255), // Couleur quand le champ est focus
+                    width: 2,
+                  ),
+                ),
+
+                // Bordure en cas d'erreur
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Colors.red, // Couleur de la bordure en cas d'erreur
+                    width: 1.5,
+                  ),
+                ),
+
+                // Bordure quand le champ est en focus et qu'il y a une erreur
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Colors.redAccent,
+                    width: 2,
+                  ),
+                ),
               ),
             ),
           ),
@@ -140,6 +189,7 @@ class _SpotsScreenState extends State<SpotsScreen> {
               itemBuilder: (context, index) {
                 final spot = filteredSpots[index];
                 return Card(
+                  color: const Color.fromARGB(255, 215, 219, 223),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'SpotCast',
       theme: ThemeData(
+         scaffoldBackgroundColor: const Color.fromARGB(255, 167, 183, 194), // Couleur de fond globale
         fontFamily: 'Poppins',
         primarySwatch: Colors.blue,
         // Ajout d'un thème pour l'AppBar
