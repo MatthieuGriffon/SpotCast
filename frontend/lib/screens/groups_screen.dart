@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
+import '../widgets/common/group_list.dart';
+
 
 class GroupsScreen extends StatefulWidget {
   const GroupsScreen({super.key});
@@ -10,6 +12,10 @@ class GroupsScreen extends StatefulWidget {
 
 class _GroupsScreenState extends State<GroupsScreen> {
   final int _selectedIndex = 2; // Index pour la page "Groups"
+
+  // Contrôleur pour le champ de recherche
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   // Méthode pour la navigation
   void _onItemSelected(int index) {
@@ -53,13 +59,55 @@ class _GroupsScreenState extends State<GroupsScreen> {
         ),
         backgroundColor: const Color(0xFF1B3A57),
       ),
-      body: const Center(
-        child: Text(
-          'Bienvenue sur la page des Groupes',
-          style: TextStyle(fontSize: 16),
-        ),
+      body: Column(
+        children: [
+          // Champ de recherche
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Rechercher un groupe',
+                hintText: 'Nom ou lieu...',
+                prefixIcon: const Icon(Icons.search),
+                labelStyle: const TextStyle(
+                  color: Color.fromARGB(255, 27, 58, 87),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color.fromARGB(255, 200, 200, 200),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF1B3A57),
+                    width: 1.5,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color.fromARGB(255, 0, 123, 255),
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Liste des groupes filtrés
+          Expanded(
+            child: GroupList(searchQuery: _searchQuery),
+          ),
+        ],
       ),
-      // Utilisation du `CustomBottomNavigationBar`
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _selectedIndex,
         onItemSelected: _onItemSelected,
