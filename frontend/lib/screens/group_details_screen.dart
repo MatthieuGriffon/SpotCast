@@ -40,37 +40,42 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   void _checkUserRole() {
     final roles = widget.group['roles'];
-    final normalizedUser = widget.currentUser.trim().toLowerCase();
+    final normalizedUserEmail = widget.currentUser.trim().toLowerCase();
 
-    // Vérifier si l'utilisateur est un admin
     if (roles['admin']
-        .any((admin) => admin.trim().toLowerCase() == normalizedUser)) {
+        .any((admin) => admin.trim().toLowerCase() == normalizedUserEmail)) {
       setState(() => _userRole = UserRole.admin);
-    }
-    // Vérifier si l'utilisateur est un membre
-    else if (roles['members']
-        .any((member) => member.trim().toLowerCase() == normalizedUser)) {
+    } else if (roles['members']
+        .any((member) => member.trim().toLowerCase() == normalizedUserEmail)) {
       setState(() => _userRole = UserRole.member);
-    }
-    // Si l'utilisateur n'est ni admin ni membre, il est un visiteur
-    else {
+    } else {
       setState(() => _userRole = UserRole.visitor);
     }
   }
 
   // Ajouter un nouveau membre
-  void _addMember() {
-    final newMember = _memberController.text.trim();
-    if (newMember.isNotEmpty &&
-        !widget.group['roles']['members'].contains(newMember)) {
-      setState(() {
-        widget.group['roles']['members'].add(newMember);
-      });
-      _memberController.clear();
-      FocusScope.of(context).unfocus(); // Fermer le clavier
+  void _addMemberByEmail() {
+    final newMemberEmail = _memberController.text.trim().toLowerCase();
+
+    // Vérifier si l'email est valide et non vide
+    if (newMemberEmail.isNotEmpty && newMemberEmail.contains('@')) {
+      if (!widget.group['roles']['members'].contains(newMemberEmail)) {
+        setState(() {
+          widget.group['roles']['members'].add(newMemberEmail);
+        });
+        _memberController.clear();
+        FocusScope.of(context).unfocus(); // Fermer le clavier
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Membre ajouté avec succès')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cet utilisateur existe déjà !')),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ce membre existe déjà !')),
+        const SnackBar(content: Text('Veuillez entrer un email valide')),
       );
     }
   }
@@ -96,23 +101,23 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   // Fonction pour envoyer un message
   void _sendMessage() {
-  final messageText = _messageController.text.trim();
-  if (messageText.isNotEmpty) {
-    setState(() {
-      messages.insert(0, {
-        'sender': widget.currentUser,
-        'message': messageText,
+    final messageText = _messageController.text.trim();
+    if (messageText.isNotEmpty) {
+      setState(() {
+        messages.insert(0, {
+          'sender': widget.currentUser,
+          'message': messageText,
+        });
+        _messageController.clear();
       });
-      _messageController.clear();
-    });
-    
-    // Fermer le clavier après l'envoi du message
-    FocusScope.of(context).unfocus();
 
-    // Faire défiler vers le bas après l'envoi du message
-    _scrollToBottom();
+      // Fermer le clavier après l'envoi du message
+      FocusScope.of(context).unfocus();
+
+      // Faire défiler vers le bas après l'envoi du message
+      _scrollToBottom();
+    }
   }
-}
 
   // Fonction pour faire défiler vers le bas
   void _scrollToBottom() {
@@ -204,7 +209,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Ajouter un membre :',
+          'Ajouter un membre par email :',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
@@ -213,15 +218,16 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             Expanded(
               child: TextField(
                 controller: _memberController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
-                  hintText: 'Nom du membre',
+                  hintText: 'Email du membre',
                   border: OutlineInputBorder(),
                 ),
               ),
             ),
             const SizedBox(width: 8),
             ElevatedButton(
-              onPressed: _addMember,
+              onPressed: _addMemberByEmail,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1B3A57),
               ),
