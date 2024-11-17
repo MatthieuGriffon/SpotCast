@@ -22,8 +22,9 @@ class GroupDetailsScreen extends StatefulWidget {
 class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _memberController = TextEditingController();
-
+  final ScrollController _scrollController = ScrollController();
   final List<Map<String, String>> messages = [];
+
 
   @override
   void initState() {
@@ -34,7 +35,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   @override
   void dispose() {
     _messageController.dispose();
-    _memberController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -89,7 +90,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     });
   }
 
-  // Ajouter un message au chat
+  // Fonction pour envoyer un message
   void _sendMessage() {
     final messageText = _messageController.text.trim();
     if (messageText.isNotEmpty) {
@@ -100,6 +101,19 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         });
         _messageController.clear();
       });
+      // Faire défiler vers le bas après l'envoi du message
+      _scrollToBottom();
+    }
+  }
+
+  // Fonction pour faire défiler vers le bas
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.minScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -249,20 +263,24 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     );
   }
 
-  Widget _buildChatSection() {
+   Widget _buildChatSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Chat du Groupe :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const Text(
+          'Chat du Groupe :',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 10),
-        Container(
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
           height: 200, // Limiter la hauteur du chat
           decoration: BoxDecoration(
             color: const Color.fromARGB(235, 236, 236, 236),
             borderRadius: BorderRadius.circular(12),
           ),
           child: ListView.builder(
+            controller: _scrollController,
             reverse: true,
             itemCount: messages.length,
             itemBuilder: (context, index) {
@@ -291,7 +309,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             ),
             const SizedBox(width: 8),
             ElevatedButton(
-              onPressed: _sendMessage, // Associer correctement la fonction ici
+              onPressed: _sendMessage,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1B3A57),
               ),
