@@ -25,7 +25,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<Map<String, String>> messages = [];
 
-
   @override
   void initState() {
     super.initState();
@@ -39,18 +38,22 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     super.dispose();
   }
 
-  // Vérifier le rôle de l'utilisateur (admin, member, visitor)
   void _checkUserRole() {
     final roles = widget.group['roles'];
     final normalizedUser = widget.currentUser.trim().toLowerCase();
 
+    // Vérifier si l'utilisateur est un admin
     if (roles['admin']
         .any((admin) => admin.trim().toLowerCase() == normalizedUser)) {
       setState(() => _userRole = UserRole.admin);
-    } else if (roles['members']
+    }
+    // Vérifier si l'utilisateur est un membre
+    else if (roles['members']
         .any((member) => member.trim().toLowerCase() == normalizedUser)) {
       setState(() => _userRole = UserRole.member);
-    } else {
+    }
+    // Si l'utilisateur n'est ni admin ni membre, il est un visiteur
+    else {
       setState(() => _userRole = UserRole.visitor);
     }
   }
@@ -64,6 +67,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         widget.group['roles']['members'].add(newMember);
       });
       _memberController.clear();
+      FocusScope.of(context).unfocus(); // Fermer le clavier
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ce membre existe déjà !')),
@@ -92,29 +96,35 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   // Fonction pour envoyer un message
   void _sendMessage() {
-    final messageText = _messageController.text.trim();
-    if (messageText.isNotEmpty) {
-      setState(() {
-        messages.insert(0, {
-          'sender': widget.currentUser,
-          'message': messageText,
-        });
-        _messageController.clear();
+  final messageText = _messageController.text.trim();
+  if (messageText.isNotEmpty) {
+    setState(() {
+      messages.insert(0, {
+        'sender': widget.currentUser,
+        'message': messageText,
       });
-      // Faire défiler vers le bas après l'envoi du message
-      _scrollToBottom();
-    }
+      _messageController.clear();
+    });
+    
+    // Fermer le clavier après l'envoi du message
+    FocusScope.of(context).unfocus();
+
+    // Faire défiler vers le bas après l'envoi du message
+    _scrollToBottom();
   }
+}
 
   // Fonction pour faire défiler vers le bas
   void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.minScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.minScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -134,18 +144,21 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             _buildGroupInfo(group),
             const SizedBox(height: 20),
 
-            // Utilisation de l'énumération pour vérifier les rôles
+            // Afficher le bouton pour rejoindre/quitter le groupe si l'utilisateur est un visiteur
             if (_userRole == UserRole.visitor) _buildJoinLeaveButton(),
             const SizedBox(height: 20),
 
+            // Afficher la section d'ajout de membre si l'utilisateur est admin
             if (_userRole == UserRole.admin) _buildAddMemberSection(),
             const SizedBox(height: 20),
 
-            _buildMembersSection(),
-            const SizedBox(height: 20),
-
-            if (_userRole == UserRole.admin || _userRole == UserRole.member)
+            // Afficher les membres et le chat si l'utilisateur est admin ou membre
+            if (_userRole == UserRole.admin ||
+                _userRole == UserRole.member) ...[
+              _buildMembersSection(),
               _buildChatSection(),
+              const SizedBox(height: 20),
+            ],
           ],
         ),
       ),
@@ -263,7 +276,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     );
   }
 
-   Widget _buildChatSection() {
+  Widget _buildChatSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
