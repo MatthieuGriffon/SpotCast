@@ -40,17 +40,27 @@ class GroupCard extends StatelessWidget {
             children: [
               const Icon(Icons.location_on, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
-              Text(
-                group['location'] ?? 'Non spécifié',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              Expanded(
+                child: Text(
+                  group['location'] ?? 'Non spécifié',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  overflow:
+                      TextOverflow.ellipsis, // Tronquer le texte si trop long
+                ),
               ),
             ],
           ),
-          trailing: Text(
-            '${group['membersCount']} membres',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
+          trailing: SizedBox(
+            width:
+                80, // Limite la largeur à 80 pixels pour éviter le débordement
+            child: Text(
+              '${group['membersCount']} membres',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+              overflow:
+                  TextOverflow.ellipsis, // Tronquer si le texte est trop long
             ),
           ),
           onTap: () {
@@ -60,7 +70,7 @@ class GroupCard extends StatelessWidget {
                 builder: (context) => GroupDetailsScreen(
                   group: group,
                   currentUser: 'Benoît',
-                  ),
+                ),
               ),
             );
           }),
