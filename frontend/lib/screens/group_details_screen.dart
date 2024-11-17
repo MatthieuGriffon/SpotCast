@@ -38,20 +38,23 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     super.dispose();
   }
 
-  void _checkUserRole() {
-    final roles = widget.group['roles'];
-    final normalizedUserEmail = widget.currentUser.trim().toLowerCase();
+ void _checkUserRole() {
+  final roles = widget.group['roles'];
+  final normalizedUserEmail = widget.currentUser.trim().toLowerCase();
 
-    if (roles['admin']
-        .any((admin) => admin.trim().toLowerCase() == normalizedUserEmail)) {
-      setState(() => _userRole = UserRole.admin);
-    } else if (roles['members']
-        .any((member) => member.trim().toLowerCase() == normalizedUserEmail)) {
-      setState(() => _userRole = UserRole.member);
-    } else {
-      setState(() => _userRole = UserRole.visitor);
-    }
+  // Vérifie si l'utilisateur est un admin
+  if (roles['admin'].any((admin) => admin.trim().toLowerCase() == normalizedUserEmail)) {
+    setState(() => _userRole = UserRole.admin);
+  } 
+  // Vérifie si l'utilisateur est un membre
+  else if (roles['members'].any((member) => member.trim().toLowerCase() == normalizedUserEmail)) {
+    setState(() => _userRole = UserRole.member);
+  } 
+  // Sinon, c'est un visiteur
+  else {
+    setState(() => _userRole = UserRole.visitor);
   }
+}
 
   // Ajouter un nouveau membre
   void _addMemberByEmail() {

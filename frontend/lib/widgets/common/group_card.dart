@@ -69,7 +69,7 @@ class GroupCard extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => GroupDetailsScreen(
                   group: group,
-                  currentUser: 'Benoît',
+                  currentUser: 'benoit@example.com',
                 ),
               ),
             );
