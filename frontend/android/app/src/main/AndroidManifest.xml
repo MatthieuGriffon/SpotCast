@@ -18,7 +18,9 @@
         android:label="SpotCast"
         android:enableOnBackInvokedCallback="true"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="true">
 
         <!-- Clé Google Maps API -->
         <meta-data
