@@ -9,8 +9,12 @@ import 'package:http/http.dart' as http;
 
 class MapScreen extends StatefulWidget {
   final Map<String, dynamic> spot;
-
-  const MapScreen({super.key, required this.spot});
+  final bool selectLocationMode; 
+   const MapScreen({
+    super.key,
+    required this.spot,
+    this.selectLocationMode = false, // Valeur par défaut à `false`
+  });
 
   @override
   State<MapScreen> createState() => _MapScreenState();

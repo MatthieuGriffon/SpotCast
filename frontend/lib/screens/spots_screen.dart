@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
+import 'add_spot_screen.dart';
 import 'spot_details_screen.dart';
 
 class SpotsScreen extends StatefulWidget {
@@ -12,9 +13,16 @@ class SpotsScreen extends StatefulWidget {
 class _SpotsScreenState extends State<SpotsScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  final String currentUserEmail = 'benoit@example.com';
+
+  // Rôle et groupes de l'utilisateur actuel
+  static const String currentUserRole = 'groupAdmin'; // 'admin', 'groupAdmin', 'member'
+  static final List<String> adminGroups = ['Group3', 'Group5']; // Groupes administrés
+  static final List<String> currentUserGroups = ['Group3']; // Groupes où l'utilisateur est membre
 
   final List<Map<String, dynamic>> spots = [
     {
+      'id': '1',
       'name': 'Lac Tranquille',
       'description': 'Un lac très calme pour pêcher en toute tranquillité',
       'location': 'Paris, France',
@@ -25,6 +33,7 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'owner': 'User1',
     },
     {
+      'id': '2',
       'name': 'Étang Secret',
       'description': 'Un étang caché pour les amateurs de pêche',
       'location': 'Lyon, France',
@@ -35,6 +44,7 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'owner': 'User2',
     },
     {
+      'id': '3',
       'name': 'Rivière Amicale',
       'description': 'Une rivière idéale pour pêcher en groupe',
       'location': 'Bordeaux, France',
@@ -42,9 +52,10 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'type': 'group',
       'latitude': 44.8378,
       'longitude': -0.5792,
-      'owner': 'User2',
+      'owner': 'Group3',
     },
     {
+      'id': '4',
       'name': 'Canal de l\'Amitié',
       'description': 'Un canal parfait pour pêcher entre amis',
       'location': 'Marseille, France',
@@ -55,6 +66,7 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'owner': 'User1',
     },
     {
+      'id': '5',
       'name': 'Lac de Toulouse le Rose',
       'description': 'Un lac rose pour une pêche romantique',
       'location': 'Toulouse, France',
@@ -64,138 +76,132 @@ class _SpotsScreenState extends State<SpotsScreen> {
       'longitude': 1.4442,
       'owner': 'User1',
     },
-    {
-      'name': 'Rivière de la Liberté',
-      'description': 'Une rivière pour pêcher en toute liberté',
-      'location': 'Nantes, France',
-      'fishType': 'Sandre, Perche',
-      'type': 'public',
-      'latitude': 47.2184,
-      'longitude': -1.5536,
-      'owner': 'User2',
-    },
-    {
-      'name': 'Étang de la Paix',
-      'description': 'Un étang paisible pour une pêche relaxante',
-      'location': 'Nice, France',
-      'fishType': 'Carpe',
-      'type': 'private',
-      'latitude': 43.7102,
-      'longitude': 7.2620,
-      'owner': 'Group3',
-    },
   ];
+
+  // Obtenir les spots visibles
+  List<Map<String, dynamic>> _getVisibleSpots() {
+    if (currentUserRole == 'admin') {
+      return spots; // Administrateurs globaux voient tout
+    }
+
+    return spots.where((spot) {
+      if (spot['type'] == 'public') {
+        return true; // Spots publics visibles par tous
+      } else if (spot['type'] == 'private') {
+        return spot['owner'] == currentUserEmail; // Spots privés visibles uniquement par le propriétaire
+      } else if (spot['type'] == 'group') {
+        // Spots de groupe visibles si membre ou admin du groupe
+        return currentUserGroups.contains(spot['owner']) ||
+            (currentUserRole == 'groupAdmin' && adminGroups.contains(spot['owner']));
+      }
+      return false;
+    }).toList();
+  }
+
+  // Supprimer un spot
+  void _deleteSpot(String spotId) {
+    setState(() {
+      spots.removeWhere((spot) => spot['id'] == spotId);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Spot supprimé avec succès !')),
+    );
+  }
+
+  // Confirmer la suppression (vérification des droits incluse)
+  void _confirmDeletion(String spotId, String spotOwner, String spotType) {
+    final bool canDelete = currentUserRole == 'admin' || // Admin global
+        (currentUserRole == 'groupAdmin' && adminGroups.contains(spotOwner) && spotType == 'group') || // Admin du groupe
+        (spotType == 'private' && spotOwner == currentUserEmail); // Propriétaire du spot privé
+
+    if (canDelete) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Confirmer la suppression'),
+          content: const Text('Êtes-vous sûr de vouloir supprimer ce spot ?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteSpot(spotId);
+                Navigator.pop(context);
+              },
+              child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vous n\'avez pas les droits pour supprimer ce spot.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Filtrer les spots en fonction de la recherche
-    final List<Map<String, dynamic>> filteredSpots = spots
+    final List<Map<String, dynamic>> visibleSpots = _getVisibleSpots();
+    final List<Map<String, dynamic>> filteredSpots = visibleSpots
         .where((spot) =>
             spot['name']!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            spot['fishType']!
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            spot['location']!
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()))
+            spot['fishType']!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            spot['location']!.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Spots'),
         backgroundColor: const Color(0xFF1B3A57),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Poppins',
-        ),
-      ),
-      body: Column(
-        children: [
-          // Barre de recherche
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                labelStyle: const TextStyle(
-                  color: Color.fromARGB(255, 0, 0, 0),
-                ),
-                labelText: 'Rechercher un spot',
-                hintText: 'Nom, type de poisson, localisation...',
-                prefixIcon: const Icon(Icons.search),
-
-                // Bordure par défaut
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Color.fromARGB(
-                        255, 200, 200, 200), // Couleur par défaut
-                    width: 1,
-                  ),
-                ),
-
-                // Bordure quand le champ est activé (mais pas encore focus)
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Color.fromARGB(
-                        255, 27, 58, 87), // Couleur personnalisée
-                    width: 1.5,
-                  ),
-                ),
-
-                // Bordure quand le champ est en focus
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Color.fromARGB(
-                        255, 0, 123, 255), // Couleur quand le champ est focus
-                    width: 2,
-                  ),
-                ),
-
-                // Bordure en cas d'erreur
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Colors.red, // Couleur de la bordure en cas d'erreur
-                    width: 1.5,
-                  ),
-                ),
-
-                // Bordure quand le champ est en focus et qu'il y a une erreur
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Colors.redAccent,
-                    width: 2,
-                  ),
+        actions: [
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.only(right: 2.0),
+              child: Text(
+                'Créer un spot',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
-
-          // Afficher les spots filtrés
+          IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: 'Créer un nouveau spot',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddSpotScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) => setState(() => _searchQuery = value),
+              decoration: const InputDecoration(
+                labelText: 'Rechercher un spot',
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: filteredSpots.length,
               itemBuilder: (context, index) {
                 final spot = filteredSpots[index];
+
                 return Card(
-                  color: const Color.fromARGB(255, 215, 219, 223),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 4,
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
                     leading: Icon(
                       spot['type'] == 'private'
@@ -209,19 +215,39 @@ class _SpotsScreenState extends State<SpotsScreen> {
                               ? Colors.blue
                               : Colors.green,
                     ),
-                    title: Text(spot['name']!),
-                    subtitle: Text(
-                      'Location: ${spot['location']}\nFish: ${spot['fishType']}',
+                    title: Text(spot['name']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Location: ${spot['location']}'),
+                        Text(
+                          'Type: ${spot['type'] == "private" ? "Privé" : spot['type'] == "group" ? "Groupe" : "Public"}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: spot['type'] == "private"
+                                ? Colors.red
+                                : spot['type'] == "group"
+                                    ? Colors.blue
+                                    : Colors.green,
+                          ),
+                        ),
+                      ],
                     ),
-                    trailing: const Icon(Icons.arrow_forward),
+                    trailing: (currentUserRole == 'admin' ||
+                            (currentUserRole == 'groupAdmin' &&
+                                adminGroups.contains(spot['owner']) &&
+                                spot['type'] == 'group') ||
+                            (spot['type'] == 'private' && spot['owner'] == currentUserEmail))
+                        ? IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _confirmDeletion(spot['id'], spot['owner'], spot['type']),
+                          )
+                        : null,
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SpotDetailsScreen(
-                            spot: spot.map((key, value) =>
-                                MapEntry(key, value.toString())),
-                          ),
+                          builder: (context) => SpotDetailsScreen(spot: spot),
                         ),
                       );
                     },
@@ -234,14 +260,10 @@ class _SpotsScreenState extends State<SpotsScreen> {
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: 1,
-        onItemSelected: (index) {
-          if (index != 1) {
-            Navigator.pushReplacementNamed(
-              context,
-              _getRouteForIndex(index),
-            );
-          }
-        },
+        onItemSelected: (index) => Navigator.pushReplacementNamed(
+          context,
+          _getRouteForIndex(index),
+        ),
       ),
     );
   }
