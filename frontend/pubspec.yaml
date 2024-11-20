@@ -16,6 +16,10 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   image_picker: ^1.1.2
   geolocator: ^13.0.2
+  flutter_localization: ^0.2.2
+  date_picker_plus: ^4.1.0
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

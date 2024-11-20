@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/event.dart';
 
-
-
 class EventDetailScreen extends StatelessWidget {
   final Event event;
 
@@ -24,7 +22,8 @@ class EventDetailScreen extends StatelessWidget {
               // Informations de base
               Text(
                 event.name,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text('${event.date} à ${event.time}'),
@@ -34,7 +33,9 @@ class EventDetailScreen extends StatelessWidget {
 
               // Prévisions météo
               if (event.weather != null) ...[
-                const Text('Prévisions météo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text('Prévisions météo',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -55,19 +56,31 @@ class EventDetailScreen extends StatelessWidget {
               ],
 
               // Description complète
-              const Text('Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('Description',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Text(event.description),
 
               const SizedBox(height: 16),
 
               // Liste des participants
-              const Text('Participants', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('Participants',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               if (event.participants.isEmpty)
                 const Text('Aucun participant pour le moment.')
               else
-                ...event.participants.map((participant) => Text('- $participant')).toList(),
+                Column(
+                  children: event.participants.map((participant) {
+                    return ListTile(
+                      leading: const CircleAvatar(
+                        backgroundColor: Colors.blueAccent,
+                        child: Icon(Icons.person, color: Colors.white),
+                      ),
+                      title: Text(participant),
+                    );
+                  }).toList(),
+                ),
 
               const SizedBox(height: 16),
 
@@ -81,13 +94,6 @@ class EventDetailScreen extends StatelessWidget {
                     },
                     icon: const Icon(Icons.check),
                     label: const Text('S\'inscrire'),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Logique pour partager
-                    },
-                    icon: const Icon(Icons.share),
-                    label: const Text('Partager'),
                   ),
                 ],
               ),

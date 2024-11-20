@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import '../widgets/common/custom_bottom_navigation_bar.dart';
 import 'package:frontend/screens/event_detail_screen.dart';
 import 'package:frontend/models/event.dart';
+import 'package:frontend/screens/create_event_screen.dart';
 
 class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
@@ -23,7 +24,8 @@ class _EventScreenState extends State<EventScreen> {
       location: 'Lac Bleu, Paris',
       latitude: 48.8566,
       longitude: 2.3522,
-      description: 'Une journée au bord du Lac Bleu pour une pêche exceptionnelle.',
+      description:
+          'Une journée au bord du Lac Bleu pour une pêche exceptionnelle.',
       participants: ['Alice', 'Bob'],
       type: 'Public',
     ),
@@ -131,15 +133,42 @@ class _EventScreenState extends State<EventScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Événements',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Poppins',
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Événements',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+              ),
+            ),
+            const SizedBox(width: 8), // Espacement entre le titre et le texte
+            const Text(
+              'Nouvel evenement',
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.white70, // Couleur légèrement atténuée
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
         ),
         backgroundColor: const Color(0xFF1B3A57),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateEventScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: events.length,
