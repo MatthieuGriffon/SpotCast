@@ -6,6 +6,7 @@ import 'screens/groups_screen.dart';
 import 'screens/spots_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/create_event_screen.dart';
+import 'screens/fishing_journal_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
@@ -21,13 +22,15 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'SpotCast',
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color.fromARGB(255, 167, 183, 194), // Couleur de fond globale
+        scaffoldBackgroundColor:
+            const Color.fromARGB(255, 167, 183, 194), // Couleur de fond globale
         fontFamily: 'Poppins',
         primarySwatch: Colors.blue,
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF1B3A57), // Couleur de fond de l'AppBar
           iconTheme: IconThemeData(
-            color: Colors.white, // Couleur des icônes, y compris la flèche de retour
+            color: Colors
+                .white, // Couleur des icônes, y compris la flèche de retour
           ),
           titleTextStyle: TextStyle(
             color: Colors.white, // Couleur du texte dans l'AppBar
@@ -45,6 +48,8 @@ class MyApp extends StatelessWidget {
         '/spots': (context) => const SpotsScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/create-event': (context) => const CreateEventScreen(),
+        '/fishing_journal': (context) =>
+            const FishingJournalScreen(), // Écran Journal de Pêche
       },
       locale: const Locale('fr', 'FR'), // Définit la locale par défaut
       localizationsDelegates: GlobalMaterialLocalizations.delegates,

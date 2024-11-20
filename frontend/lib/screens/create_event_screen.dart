@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
 import 'package:frontend/screens/select_location_event_screen.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
