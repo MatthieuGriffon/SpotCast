@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
+import 'package:frontend/screens/select_location_event_screen.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
@@ -90,8 +92,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           fontSize:
                               8), // Réduit la taille des jours de la semaine
                       enabledCellsTextStyle: const TextStyle(
-                          fontSize:
-                              8), // Réduit la taille des cellules actives
+                          fontSize: 8), // Réduit la taille des cellules actives
                       currentDateTextStyle: const TextStyle(
                           fontSize: 8,
                           color: Colors.red), // Style pour la date actuelle
@@ -120,16 +121,44 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Heure
+                // Champ pour l'heure
                 TextFormField(
                   controller: _timeController,
                   decoration:
-                      const InputDecoration(labelText: 'Heure (hh:mm) *'),
+                      const InputDecoration(labelText: 'Heure (HH:mm) *'),
                   validator: (value) => value == null || value.isEmpty
-                      ? 'Veuillez entrer une heure'
+                      ? 'Veuillez sélectionner une heure'
                       : null,
-                  keyboardType: TextInputType.datetime,
+                  readOnly: true, // Rend le champ non modifiable directement
+                  onTap: () async {
+                    TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(), // Heure initiale par défaut
+                      builder: (BuildContext context, Widget? child) {
+                        return MediaQuery(
+                          data: MediaQuery.of(context).copyWith(
+                            // Permet de personnaliser le style si nécessaire
+                            alwaysUse24HourFormat:
+                                true, // Affiche le format 24h
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+
+                    if (pickedTime != null) {
+                      // Convertir TimeOfDay en String avec le format HH:mm
+                      String formattedTime =
+                          '${pickedTime.hour.toString().padLeft(2, '0')}:${pickedTime.minute.toString().padLeft(2, '0')}';
+
+                      setState(() {
+                        _timeController.text =
+                            formattedTime; // Met à jour le champ
+                      });
+                    }
+                  },
                 ),
+
                 const SizedBox(height: 16),
 
                 // Lieu
@@ -137,9 +166,27 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   controller: _locationController,
                   decoration: const InputDecoration(labelText: 'Lieu *'),
                   validator: (value) => value == null || value.isEmpty
-                      ? 'Veuillez entrer un lieu'
+                      ? 'Veuillez sélectionner un lieu'
                       : null,
+                  readOnly:
+                      true, // Empêche l'utilisateur de modifier manuellement
+                  onTap: () async {
+                    final String? selectedAddress = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SelectLocationEventScreen(),
+                      ),
+                    );
+
+                    if (selectedAddress != null) {
+                      setState(() {
+                        _locationController.text =
+                            selectedAddress; // Met à jour le champ
+                      });
+                    }
+                  },
                 ),
+
                 const SizedBox(height: 16),
 
                 // Description
