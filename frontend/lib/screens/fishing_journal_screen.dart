@@ -2,6 +2,102 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/screens/select_location_event_screen.dart';
+import 'package:date_picker_plus/date_picker_plus.dart';
+
+class PhotoGallery extends StatefulWidget {
+  const PhotoGallery({super.key, required this.onPhotosUpdated});
+
+  final Function(List<File>) onPhotosUpdated;
+
+  @override
+  State<PhotoGallery> createState() => _PhotoGalleryState();
+}
+
+class _PhotoGalleryState extends State<PhotoGallery> {
+  final ImagePicker _picker = ImagePicker();
+  final List<File> _photos = [];
+
+  Future<void> _pickImage(bool isCamera) async {
+    final ImageSource source =
+        isCamera ? ImageSource.camera : ImageSource.gallery;
+    try {
+      final XFile? pickedFile = await _picker.pickImage(source: source);
+      if (pickedFile != null) {
+        setState(() {
+          _photos.add(File(pickedFile.path));
+        });
+        widget.onPhotosUpdated(_photos);
+      } else {
+        print('Aucune image sélectionnée');
+      }
+    } catch (e) {
+      print('Erreur lors de la sélection de l\'image: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Boutons pour ajouter une photo
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ElevatedButton.icon(
+              onPressed: () => _pickImage(false), // Galerie
+              icon: const Icon(Icons.photo_library),
+              label: const Text('Galerie'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () => _pickImage(true), // Caméra
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Caméra'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Aperçu des photos
+        _photos.isEmpty
+            ? const Text('Aucune photo sélectionnée',
+                style: TextStyle(color: Colors.grey))
+            : SizedBox(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _photos.length,
+                  itemBuilder: (context, index) {
+                    return Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            _photos[index],
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              _photos.removeAt(index);
+                            });
+                            widget.onPhotosUpdated(_photos);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+      ],
+    );
+  }
+}
 
 class FishingJournalScreen extends StatefulWidget {
   const FishingJournalScreen({super.key});
@@ -11,11 +107,12 @@ class FishingJournalScreen extends StatefulWidget {
 }
 
 class _FishingJournalScreenState extends State<FishingJournalScreen> {
-  final List<File> _photos = []; // Liste des photos sélectionnées
-  final ImagePicker _picker = ImagePicker();
+  final List<File> _photos = []; // Liste des photos partagées avec PhotoGallery
   final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
 
-  // Exemples de captures (remplacer par des données dynamiques si besoin)
+  // Exemples de captures
   final List<Map<String, dynamic>> _captures = [
     {
       'type': 'Carpe',
@@ -39,205 +136,122 @@ class _FishingJournalScreenState extends State<FishingJournalScreen> {
       'photo': '',
     },
   ];
-
   // Statistiques globales (exemple statique)
   final int _totalCatches = 42;
   final String _bestCatch = '7 kg';
   final String _mostFrequentFish = 'Carpe';
 
+
   @override
   void dispose() {
     _locationController.dispose();
+    _dateController.dispose();
+    _timeController.dispose();
     super.dispose();
   }
 
-  // Méthode pour sélectionner une photo
-  Future<void> _pickImage(bool isCamera) async {
-    final ImageSource source =
-        isCamera ? ImageSource.camera : ImageSource.gallery;
-    try {
-      final XFile? pickedFile = await _picker.pickImage(source: source);
-      if (pickedFile != null) {
-        setState(() {
-          _photos.add(File(pickedFile.path));
-        });
-      } else {
-        print('Aucune image sélectionnée');
-      }
-    } catch (e) {
-      print('Erreur lors de la sélection de l\'image: $e');
-    }
+  // Gestion des photos mises à jour depuis PhotoGallery
+  void _updatePhotos(List<File> newPhotos) {
+    setState(() {
+      _photos.clear();
+      _photos.addAll(newPhotos);
+    });
   }
 
-  // Formulaire pour ajouter une capture
-  void _openAddCaptureForm() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        // Utiliser StatefulBuilder pour gérer le changement d'état localement
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Champs texte pour les détails de la capture
-                    TextField(
-                      decoration:
-                          const InputDecoration(labelText: 'Type de Poisson'),
-                    ),
-                    TextField(
-                      decoration:
-                          const InputDecoration(labelText: 'Poids (kg)'),
-                    ),
-                    TextField(
-                      controller:
-                          _locationController, // Utilise un TextEditingController
-                      readOnly: true, // Empêche la saisie manuelle
-                      decoration: const InputDecoration(labelText: 'Lieu'),
-                      onTap: () async {
-                        // Naviguer vers SelectLocationEventScreen
-                        final String? selectedLocation = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const SelectLocationEventScreen(),
-                          ),
-                        );
-
-                        // Mettre à jour le TextField si une adresse est sélectionnée
-                        if (selectedLocation != null &&
-                            selectedLocation.isNotEmpty) {
-                          setState(() {
-                            _locationController.text = selectedLocation;
-                          });
-                        }
-                      },
-                    ),
-                    TextField(
-                      decoration:
-                          const InputDecoration(labelText: 'Date et Heure'),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Section pour ajouter une photo
-                    Card(
-                      color: Colors.grey[200],
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Ajouter une photo',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: () async {
-                                    await _pickImage(false);
-                                    // Mettre à jour le `BottomSheet` via `setModalState`
-                                    setModalState(() {});
-                                  },
-                                  icon: const Icon(Icons.photo_library),
-                                  label: const Text('Galerie'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                  ),
-                                ),
-                                ElevatedButton.icon(
-                                  onPressed: () async {
-                                    await _pickImage(true);
-                                    // Mettre à jour le `BottomSheet` via `setModalState`
-                                    setModalState(() {});
-                                  },
-                                  icon: const Icon(Icons.camera_alt),
-                                  label: const Text('Caméra'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Aperçu des photos sélectionnées
-                    const SizedBox(height: 16),
-                    _photos.isEmpty
-                        ? const Text(
-                            'Aucune photo sélectionnée',
-                            style: TextStyle(color: Colors.grey),
-                          )
-                        : SizedBox(
-                            height: 120,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: _photos.length,
-                              itemBuilder: (context, index) {
-                                return Stack(
-                                  alignment: Alignment.topRight,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.file(
-                                        _photos[index],
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.close,
-                                          color: Colors.red),
-                                      onPressed: () {
-                                        setModalState(() {
-                                          _photos.removeAt(index);
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-
-                    const SizedBox(height: 16),
-
-                    // Bouton pour valider l'ajout
-                    ElevatedButton(
-                      onPressed: () {
-                        // Logique pour valider et ajouter la capture
-                        Navigator.pop(context); // Fermer le formulaire
-                      },
-                      child: const Text('Ajouter Capture'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // Méthode pour supprimer une capture
+   // Méthode pour supprimer une capture
   void _deleteCapture(int index) {
     setState(() {
       _captures.removeAt(index);
     });
   }
 
-  @override
+  void _openAddCaptureForm() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Champ Type de Poisson
+                TextField(
+                  decoration:
+                      const InputDecoration(labelText: 'Type de Poisson'),
+                ),
+
+                // Champ Poids
+                TextField(
+                  decoration: const InputDecoration(labelText: 'Poids (kg)'),
+                ),
+
+                // Champ Lieu
+                TextField(
+                  controller: _locationController,
+                  decoration: const InputDecoration(labelText: 'Lieu'),
+                  readOnly: true,
+                  onTap: () async {
+                    final String? selectedLocation = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SelectLocationEventScreen(),
+                      ),
+                    );
+                    if (selectedLocation != null) {
+                      setState(() {
+                        _locationController.text = selectedLocation;
+                      });
+                    }
+                  },
+                ),
+
+                // Champ Date
+                TextField(
+                  controller: _dateController,
+                  decoration:
+                      const InputDecoration(labelText: 'Date (jj/mm/aaaa)'),
+                  readOnly: true,
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePickerDialog(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      minDate: DateTime(2020),
+                      maxDate: DateTime(2100),
+                    );
+                    if (pickedDate != null) {
+                      setState(() {
+                        _dateController.text =
+                            '${pickedDate.day.toString().padLeft(2, '0')}/'
+                            '${pickedDate.month.toString().padLeft(2, '0')}/'
+                            '${pickedDate.year}';
+                      });
+                    }
+                  },
+                ),
+
+                // PhotoGallery intégré
+                const SizedBox(height: 16),
+                PhotoGallery(onPhotosUpdated: _updatePhotos),
+
+                // Bouton de validation
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    // Logique d'ajout de la capture
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Ajouter Capture'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -316,25 +330,20 @@ class _FishingJournalScreenState extends State<FishingJournalScreen> {
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.grey[300],
                   ),
-                  child: capture['photo'] != null &&
-                          capture['photo']!.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(capture['photo']),
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : Center(
-                          child: Text(
-                            capture['type'][0], // Initiale du type de poisson
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                  child:
+                      capture['photo'] != null && capture['photo']!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                File(capture['photo']),
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.image,
+                              size: 30,
+                              color: Colors.blue,
                             ),
-                          ),
-                        ),
                 ),
                 const SizedBox(width: 16),
 
