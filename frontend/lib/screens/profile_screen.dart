@@ -87,9 +87,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Profil',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ],
+        ),
         backgroundColor: const Color(0xFF1B3A57),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -410,12 +423,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context,
-                    '/fishing_journal'); // Naviguer vers le Journal de pêche
-              },
-              child: const Text('Voir tout le journal'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .spaceEvenly, // Centrage avec espacement égal
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/fishing_journal', // Naviguer vers le Journal de pêche
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        const Color(0xFF1B3A57), // Couleur de fond principale
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16), // Espacement
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8), // Coins arrondis
+                    ),
+                    elevation: 3, // Ombre pour un léger effet de relief
+                  ),
+                  child: const Text(
+                    'Journal de Pêche', // Texte du bouton
+                    style: TextStyle(
+                      color: Colors.white, // Couleur du texte
+                      fontSize: 14, // Taille de la police
+                      fontWeight: FontWeight.bold, // Texte en gras
+                      fontFamily: 'Poppins', // Police personnalisée
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

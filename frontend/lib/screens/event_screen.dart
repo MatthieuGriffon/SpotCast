@@ -139,36 +139,38 @@ class _EventScreenState extends State<EventScreen> {
             const Text(
               'Événements',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
               ),
             ),
-            const SizedBox(width: 8), // Espacement entre le titre et le texte
-            const Text(
-              'Nouvel evenement',
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.white70, // Couleur légèrement atténuée
-                fontWeight: FontWeight.normal,
-              ),
+            Row(
+              children: [
+                const Text(
+                  'Nouvel événement',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Créer un nouvel événement',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CreateEventScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),
         backgroundColor: const Color(0xFF1B3A57),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateEventScreen(),
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: ListView.builder(
         itemCount: events.length,

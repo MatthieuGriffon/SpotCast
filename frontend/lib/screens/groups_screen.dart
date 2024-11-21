@@ -268,37 +268,39 @@ class _GroupsScreenState extends State<GroupsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Groupes',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color(0xFF1B3A57),
-        actions: [
-          Row(
-            children: [
-              // Texte "Ajouter un groupe"
-              const Padding(
-                padding: EdgeInsets.only(right: 1.0),
-                child: Text(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Groupes',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+              ),
+            ),
+            Row(
+              children: [
+                const Text(
                   'Ajouter un groupe',
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    fontSize: 10,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
-              ),
-              // Bouton avec l'icône "+"
-              IconButton(
-                icon: const Icon(Icons.add),
-                tooltip: 'Ajouter un groupe',
-                onPressed: () {
-                  _showAddGroupDialog();
-                },
-              ),
-            ],
-          ),
-        ],
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Ajouter un groupe',
+                  onPressed: () {
+                    _showAddGroupDialog(); // Appelle la méthode pour ajouter un groupe
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF1B3A57),
       ),
       body: Column(
         children: [

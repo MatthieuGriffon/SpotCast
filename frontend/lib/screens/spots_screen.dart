@@ -16,9 +16,15 @@ class _SpotsScreenState extends State<SpotsScreen> {
   final String currentUserEmail = 'benoit@example.com';
 
   // Rôle et groupes de l'utilisateur actuel
-  static const String currentUserRole = 'groupAdmin'; // 'admin', 'groupAdmin', 'member'
-  static final List<String> adminGroups = ['Group3', 'Group5']; // Groupes administrés
-  static final List<String> currentUserGroups = ['Group3']; // Groupes où l'utilisateur est membre
+  static const String currentUserRole =
+      'groupAdmin'; // 'admin', 'groupAdmin', 'member'
+  static final List<String> adminGroups = [
+    'Group3',
+    'Group5'
+  ]; // Groupes administrés
+  static final List<String> currentUserGroups = [
+    'Group3'
+  ]; // Groupes où l'utilisateur est membre
 
   final List<Map<String, dynamic>> spots = [
     {
@@ -88,11 +94,13 @@ class _SpotsScreenState extends State<SpotsScreen> {
       if (spot['type'] == 'public') {
         return true; // Spots publics visibles par tous
       } else if (spot['type'] == 'private') {
-        return spot['owner'] == currentUserEmail; // Spots privés visibles uniquement par le propriétaire
+        return spot['owner'] ==
+            currentUserEmail; // Spots privés visibles uniquement par le propriétaire
       } else if (spot['type'] == 'group') {
         // Spots de groupe visibles si membre ou admin du groupe
         return currentUserGroups.contains(spot['owner']) ||
-            (currentUserRole == 'groupAdmin' && adminGroups.contains(spot['owner']));
+            (currentUserRole == 'groupAdmin' &&
+                adminGroups.contains(spot['owner']));
       }
       return false;
     }).toList();
@@ -111,8 +119,11 @@ class _SpotsScreenState extends State<SpotsScreen> {
   // Confirmer la suppression (vérification des droits incluse)
   void _confirmDeletion(String spotId, String spotOwner, String spotType) {
     final bool canDelete = currentUserRole == 'admin' || // Admin global
-        (currentUserRole == 'groupAdmin' && adminGroups.contains(spotOwner) && spotType == 'group') || // Admin du groupe
-        (spotType == 'private' && spotOwner == currentUserEmail); // Propriétaire du spot privé
+        (currentUserRole == 'groupAdmin' &&
+            adminGroups.contains(spotOwner) &&
+            spotType == 'group') || // Admin du groupe
+        (spotType == 'private' &&
+            spotOwner == currentUserEmail); // Propriétaire du spot privé
 
     if (canDelete) {
       showDialog(
@@ -130,14 +141,17 @@ class _SpotsScreenState extends State<SpotsScreen> {
                 _deleteSpot(spotId);
                 Navigator.pop(context);
               },
-              child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+              child:
+                  const Text('Supprimer', style: TextStyle(color: Colors.red)),
             ),
           ],
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vous n\'avez pas les droits pour supprimer ce spot.')),
+        const SnackBar(
+            content:
+                Text('Vous n\'avez pas les droits pour supprimer ce spot.')),
       );
     }
   }
@@ -148,39 +162,53 @@ class _SpotsScreenState extends State<SpotsScreen> {
     final List<Map<String, dynamic>> filteredSpots = visibleSpots
         .where((spot) =>
             spot['name']!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            spot['fishType']!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            spot['location']!.toLowerCase().contains(_searchQuery.toLowerCase()))
+            spot['fishType']!
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            spot['location']!
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()))
         .toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Spots'),
-        backgroundColor: const Color(0xFF1B3A57),
-        actions: [
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.only(right: 2.0),
-              child: Text(
-                'Créer un spot',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Spots',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
               ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Créer un nouveau spot',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddSpotScreen()),
-              );
-            },
-          ),
-        ],
+            Row(
+              children: [
+                const Text(
+                  'Créer un spot',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Créer un nouveau spot',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AddSpotScreen()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF1B3A57),
       ),
       body: Column(
         children: [
@@ -237,10 +265,12 @@ class _SpotsScreenState extends State<SpotsScreen> {
                             (currentUserRole == 'groupAdmin' &&
                                 adminGroups.contains(spot['owner']) &&
                                 spot['type'] == 'group') ||
-                            (spot['type'] == 'private' && spot['owner'] == currentUserEmail))
+                            (spot['type'] == 'private' &&
+                                spot['owner'] == currentUserEmail))
                         ? IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _confirmDeletion(spot['id'], spot['owner'], spot['type']),
+                            onPressed: () => _confirmDeletion(
+                                spot['id'], spot['owner'], spot['type']),
                           )
                         : null,
                     onTap: () {
