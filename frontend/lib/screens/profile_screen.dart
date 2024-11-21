@@ -97,8 +97,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             // Photo de profil
             Stack(
-              alignment: Alignment.bottomRight,
+              alignment: Alignment.center, // Centre le contenu du Stack
+              clipBehavior:
+                  Clip.none, // Permet aux widgets de dépasser les limites
               children: [
+                // Avatar circulaire
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -119,12 +122,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     backgroundColor: Colors.grey[300],
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.camera_alt),
-                  onPressed: _pickImage, // Sélectionner une image
+
+                // Bouton en dehors du cercle
+                Positioned(
+                  right: -15, // Décalage horizontal (en dehors du cercle)
+                  bottom: -15, // Décalage vertical (en dehors du cercle)
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blueAccent, // Couleur de fond du bouton
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 5,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                      ),
+                      onPressed: _pickImage,
+                      iconSize: 24, // Ajustez la taille de l'icône
+                    ),
+                  ),
                 ),
               ],
             ),
+
             const SizedBox(height: 16),
 
             // Nom d'utilisateur
@@ -398,17 +425,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildAccountActions() {
     return Column(
+      crossAxisAlignment:
+          CrossAxisAlignment.stretch, // Étendre les boutons horizontalement
       children: [
-        TextButton(
+        ElevatedButton.icon(
           onPressed: () {
             // Logique de déconnexion
           },
-          child: const Text(
-            'Déconnexion',
-            style: TextStyle(color: Colors.blue),
+          icon: const Icon(Icons.logout, color: Colors.white),
+          label: const Text('Déconnexion'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue, // Couleur de fond
+            padding:
+                const EdgeInsets.symmetric(vertical: 12), // Padding vertical
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8), // Coins arrondis
+            ),
           ),
         ),
-        TextButton(
+        const SizedBox(height: 10),
+        ElevatedButton.icon(
+          onPressed: () {
+            // Logique pour changer le mot de passe
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Changer le mot de passe'),
+                content: const Text(
+                    'Redirigez vers la logique ou formulaire de changement de mot de passe.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Annuler'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Fermer le dialogue
+                      // Ajouter ici la navigation ou logique pour changer le mot de passe
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: const Text('Confirmer'),
+                  ),
+                ],
+              ),
+            );
+          },
+          icon: const Icon(Icons.lock, color: Colors.white),
+          label: const Text('Changer le mot de passe'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                const Color(0xFFD06237), // Couleur pour distinguer ce bouton
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        ElevatedButton.icon(
           onPressed: () {
             showDialog(
               context: context,
@@ -421,23 +497,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () => Navigator.pop(context),
                     child: const Text('Annuler'),
                   ),
-                  TextButton(
+                  ElevatedButton(
                     onPressed: () {
                       // Logique de suppression
                       Navigator.pop(context);
                     },
-                    child: const Text(
-                      'Supprimer',
-                      style: TextStyle(color: Colors.red),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
                     ),
+                    child: const Text('Supprimer',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
             );
           },
-          child: const Text(
-            'Supprimer le compte',
-            style: TextStyle(color: Colors.red),
+          icon: const Icon(Icons.delete, color: Colors.white),
+          label: const Text('Supprimer le compte'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         ),
       ],

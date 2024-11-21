@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'widgets/splash/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/event_screen.dart';
 import 'screens/groups_screen.dart';
@@ -39,9 +38,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/', // Utilise les routes pour naviguer
+      initialRoute: '/home', // Utilise les routes pour naviguer
       routes: {
-        '/': (context) => const SplashScreen(),
         '/home': (context) => const HomeScreen(),
         '/events': (context) => const EventScreen(),
         '/groups': (context) => const GroupsScreen(),
