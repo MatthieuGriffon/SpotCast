@@ -5,23 +5,22 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.increments('id') // Utilise un entier pour l'identifiant interne de cette table
       table
-        .integer('tokenable_id')
+        .uuid('uuid') // Corrige le type en uuid pour correspondre à la clé primaire de users
         .notNullable()
-        .unsigned()
-        .references('id')
+        .references('id') // La clé étrangère fait référence à 'id' de la table 'users'
         .inTable('users')
-        .onDelete('CASCADE')
+        .onDelete('CASCADE') // Supprime les tokens si l'utilisateur est supprimé
 
       table.string('type').notNullable()
       table.string('name').nullable()
       table.string('hash').notNullable()
       table.text('abilities').notNullable()
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
-      table.timestamp('last_used_at').nullable()
-      table.timestamp('expires_at').nullable()
+      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
+      table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())
+      table.timestamp('last_used_at', { useTz: true }).nullable()
+      table.timestamp('expires_at', { useTz: true }).nullable()
     })
   }
 
