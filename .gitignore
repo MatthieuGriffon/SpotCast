@@ -1,5 +1,5 @@
 # Global ignore for SpotCast
-
+note.txt
 # Logs
 *.log
 npm-debug.log*

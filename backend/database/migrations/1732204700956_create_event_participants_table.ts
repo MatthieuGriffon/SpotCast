@@ -1,14 +1,14 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
-export default class extends BaseSchema {
+export default class EventParticipants extends BaseSchema {
   protected tableName = 'event_participants'
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.uuid('event_id').references('id').inTable('events').onDelete('CASCADE')
-      table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE')
+      table.uuid('eventId').references('id').inTable('events').onDelete('CASCADE')
+      table.uuid('userId').references('id').inTable('users').onDelete('CASCADE')
       table.enum('status', ['invited', 'confirmed', 'cancelled']).defaultTo('invited')
-      table.primary(['event_id', 'user_id'])
+      table.primary(['eventId', 'userId']) // Clé composite
     })
   }
 
