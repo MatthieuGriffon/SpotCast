@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:frontend/screens/select_location_event_screen.dart';
 
 class FishingJournalScreen extends StatefulWidget {
   const FishingJournalScreen({super.key});
@@ -12,6 +13,7 @@ class FishingJournalScreen extends StatefulWidget {
 class _FishingJournalScreenState extends State<FishingJournalScreen> {
   final List<File> _photos = []; // Liste des photos sélectionnées
   final ImagePicker _picker = ImagePicker();
+  final TextEditingController _locationController = TextEditingController();
 
   // Exemples de captures (remplacer par des données dynamiques si besoin)
   final List<Map<String, dynamic>> _captures = [
@@ -42,6 +44,12 @@ class _FishingJournalScreenState extends State<FishingJournalScreen> {
   final int _totalCatches = 42;
   final String _bestCatch = '7 kg';
   final String _mostFrequentFish = 'Carpe';
+
+  @override
+  void dispose() {
+    _locationController.dispose();
+    super.dispose();
+  }
 
   // Méthode pour sélectionner une photo
   Future<void> _pickImage(bool isCamera) async {
@@ -85,7 +93,28 @@ class _FishingJournalScreenState extends State<FishingJournalScreen> {
                           const InputDecoration(labelText: 'Poids (kg)'),
                     ),
                     TextField(
+                      controller:
+                          _locationController, // Utilise un TextEditingController
+                      readOnly: true, // Empêche la saisie manuelle
                       decoration: const InputDecoration(labelText: 'Lieu'),
+                      onTap: () async {
+                        // Naviguer vers SelectLocationEventScreen
+                        final String? selectedLocation = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const SelectLocationEventScreen(),
+                          ),
+                        );
+
+                        // Mettre à jour le TextField si une adresse est sélectionnée
+                        if (selectedLocation != null &&
+                            selectedLocation.isNotEmpty) {
+                          setState(() {
+                            _locationController.text = selectedLocation;
+                          });
+                        }
+                      },
                     ),
                     TextField(
                       decoration:

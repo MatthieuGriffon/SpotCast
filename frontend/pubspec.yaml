@@ -47,6 +47,7 @@ flutter:
     - assets/images/image_slider02.webp
     - assets/images/image_slider03.webp
     - assets/icon/app_icon.png
+    - assets/default/default_profile.png
 
   fonts:
     - family: Lato

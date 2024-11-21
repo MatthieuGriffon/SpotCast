@@ -114,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     radius: 50,
                     backgroundImage: _selectedImage != null
                         ? FileImage(_selectedImage!)
-                        : AssetImage('assets/default_profile.jpg')
+                        : AssetImage('assets/default/default_profile.png')
                             as ImageProvider,
                     backgroundColor: Colors.grey[300],
                   ),
