@@ -2,8 +2,8 @@ import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 import server from '@adonisjs/core/services/server'
 
-import AuthController from '../app/controllers/auth_controller.js'
-import UsersController from '../app/controllers/users_controller.js'
+const AuthController = () => import('../app/controllers/auth_controller.js')
+const UsersController = () => import('../app/controllers/users_controller.js')
 
 const API_PREFIX = '/api'
 
@@ -27,16 +27,4 @@ router
 router.get('/', () => 'Welcome to SpotCast!')
 router.get(API_PREFIX, () => {
   return { message: 'Welcome to the SpotCast API!' }
-})
-
-// Server Error Handler
-server.errorHandler(async ({ response, error }) => {
-  if (error.status === 404) {
-    response.status(404).send({ message: 'Route not found' })
-  } else {
-    response.status(error.status || 500).send({
-      message: 'Internal server error',
-      error: error.message,
-    })
-  }
 })
