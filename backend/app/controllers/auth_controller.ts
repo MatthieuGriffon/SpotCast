@@ -7,24 +7,25 @@ export default class AuthController {
     const { email, password } = request.only(['email', 'password'])
 
     try {
-      // Trouver l'utilisateur avec l'email fourni
       const user = await User.query().where('email', email).firstOrFail()
 
-      // Vérifier le mot de passe (si un mot de passe est défini)
       if (user.password && !(await hash.verify(user.password, password))) {
         return response.unauthorized({ message: 'Invalid credentials' })
       }
 
-      // Générer un Access Token
       const token = await User.accessTokens.create(user, ['*'], {
         expiresIn: '30 days',
-        name: 'Mobile App Token',
+        name: 'Login Token',
       })
 
       return response.ok({
-        type: 'bearer',
-        value: token.value!.release(),
-        expiresAt: token.expiresAt?.toISOString(),
+        message: 'Login successful',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+        token: token.value!.release(),
       })
     } catch (error) {
       return response.badRequest({ message: 'Login failed', error: error.message })

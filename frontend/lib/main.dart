@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'screens/home_screen.dart';
 import 'screens/event_screen.dart';
 import 'screens/groups_screen.dart';
@@ -6,11 +10,14 @@ import 'screens/spots_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/create_event_screen.dart';
 import 'screens/fishing_journal_screen.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 Future<void> main() async {
-  await dotenv.load(fileName: ".env"); // Charge les variables
-  runApp(const MyApp());
+  await dotenv.load(fileName: ".env"); // Charge les variables d'environnement
+  runApp(
+    ProviderScope( // Enveloppe l'application dans un ProviderScope pour Riverpod
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

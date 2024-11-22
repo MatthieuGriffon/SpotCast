@@ -25,6 +25,12 @@ export default class UsersController {
         provider: 'local',
       })
 
+      // Génération de l'access token
+      const token = await User.accessTokens.create(user, ['*'], {
+        expiresIn: '30 days',
+        name: 'Signup Token',
+      })
+
       return response.created({
         message: 'User created successfully',
         user: {
@@ -32,6 +38,7 @@ export default class UsersController {
           email: user.email,
           name: user.name,
         },
+        token: token.value!.release(),
       })
     } catch (error) {
       return response.internalServerError({

@@ -1,16 +1,19 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../../providers//auth_provider.dart';
+import '../../utils/token_storage.dart';
 
-class SignUpModal extends StatefulWidget {
+class SignUpModal extends ConsumerStatefulWidget {
   const SignUpModal({super.key});
 
   @override
-  State<SignUpModal> createState() => _SignUpModalState();
+  ConsumerState<SignUpModal> createState() => _SignUpModalState();
 }
 
-class _SignUpModalState extends State<SignUpModal> {
+class _SignUpModalState extends ConsumerState<SignUpModal> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -27,9 +30,9 @@ class _SignUpModalState extends State<SignUpModal> {
     super.dispose();
   }
 
-  Future<void> _registerUser() async {
+  Future<void> _registerUser(BuildContext context) async {
     final String apiUrl =
-        '${dotenv.get('API_BASE_URL', fallback: 'http://192.168.1.16:3333/api')}/users';
+        '${dotenv.get('API_BASE_URL', fallback: 'http://localhost:3333/api')}/users';
 
     if (_passwordController.text != _confirmPasswordController.text) {
       _showMessage('Les mots de passe ne correspondent pas.');
@@ -41,43 +44,45 @@ class _SignUpModalState extends State<SignUpModal> {
     });
 
     try {
-      print('Envoi de la requête...');
-      print('URL : $apiUrl');
-      print('Corps : ${{
-        'name': _usernameController.text,
-        'email': _emailController.text,
-        'password': _passwordController.text,
-      }}');
-
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'name': _usernameController.text,
-          'email': _emailController.text,
+          'name': _usernameController.text.trim(),
+          'email': _emailController.text.trim(),
           'password': _passwordController.text,
         }),
       );
 
-      print('Statut de la réponse : ${response.statusCode}');
-      print('Corps de la réponse : ${response.body}');
-
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        _showMessage('Inscription réussie !');
-        Navigator.pop(context);
+        // Stocker le token de manière sécurisée
+        await storeAccessToken(responseData['token']);
+
+        // Mettre à jour l'état d'authentification avec Riverpod
+        ref.read(authProvider.notifier).login(responseData['token']);
+
+        if (mounted) {
+          // Rediriger vers la page principale
+          Navigator.of(context).pushReplacementNamed('/dashboard');
+        }
       } else {
-        _showMessage(
-            responseData['message'] ?? 'Erreur lors de l\'inscription.');
+        if (mounted) {
+          _showMessage(
+              responseData['message'] ?? 'Erreur lors de l\'inscription.');
+        }
       }
     } catch (e) {
-      print('Erreur réseau : $e');
-      _showMessage('Erreur réseau : ${e.toString()}');
+      if (mounted) {
+        _showMessage('Erreur réseau : ${e.toString()}');
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -157,7 +162,7 @@ class _SignUpModalState extends State<SignUpModal> {
               const SizedBox(height: 20),
               // Bouton d'inscription
               ElevatedButton(
-                onPressed: _isLoading ? null : _registerUser,
+                onPressed: _isLoading ? null : () => _registerUser(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1B3A57),
                   shape: RoundedRectangleBorder(
