@@ -20,6 +20,7 @@ dependencies:
   date_picker_plus: ^4.1.0
   flutter_localizations:
     sdk: flutter
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -48,6 +49,7 @@ flutter:
     - assets/images/image_slider03.webp
     - assets/icon/app_icon.png
     - assets/default/default_profile.png
+    - .env
 
   fonts:
     - family: Lato

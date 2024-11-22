@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, beforeCreate } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider, AccessToken } from '@adonisjs/auth/access_tokens'
+import { v4 as uuidv4 } from 'uuid'
 
 // Configuration pour le hashage des mots de passe
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
@@ -48,13 +49,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare refreshToken: string | null
 
-  /** Date de création de l'utilisateur */
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
+  public createdAt!: DateTime
 
-  /** Date de la dernière mise à jour */
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
+  public updatedAt!: DateTime
 
   /** Date de la dernière connexion */
   @column.dateTime()
@@ -63,6 +62,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
   /** Statut actif ou inactif de l'utilisateur */
   @column()
   declare isActive: boolean
+
+  @beforeCreate()
+  public static assignUuid(user: User) {
+    user.id = uuidv4()
+  }
 
   /** Configuration des tokens d'accès pour l'utilisateur */
   static accessTokens = DbAccessTokensProvider.forModel(User, {

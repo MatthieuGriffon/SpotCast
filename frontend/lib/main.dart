@@ -7,8 +7,9 @@ import 'screens/profile_screen.dart';
 import 'screens/create_event_screen.dart';
 import 'screens/fishing_journal_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
-void main() {
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+Future<void> main() async {
+  await dotenv.load(fileName: ".env"); // Charge les variables
   runApp(const MyApp());
 }
 

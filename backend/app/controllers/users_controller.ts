@@ -1,81 +1,41 @@
 import { HttpContext } from '@adonisjs/core/http'
 import User from '../models/user.js'
+import hash from '@adonisjs/core/services/hash'
 
 export default class UsersController {
-  /**
-   * Récupérer la liste de tous les utilisateurs.
-   * GET /api/users
-   */
-  public async index({ response }: HttpContext) {
-    try {
-      const users = await User.all()
-      return response.ok(users)
-    } catch (error) {
-      return response.internalServerError({
-        message: 'Failed to fetch users',
-        error: error.message,
-      })
-    }
-  }
+  public async store({ request, response }: HttpContext) {
+    const { email, password, name, bio } = request.only(['email', 'password', 'name', 'bio'])
 
-  /**
-   * Récupérer les détails d'un utilisateur spécifique.
-   * GET /api/users/:id
-   */
-  public async show({ params, response }: HttpContext) {
     try {
-      const user = await User.find(params.id)
-      if (!user) {
-        return response.notFound({ message: 'User not found' })
-      }
-      return response.ok(user)
-    } catch (error) {
-      return response.internalServerError({
-        message: 'Failed to fetch user',
-        error: error.message,
-      })
-    }
-  }
-
-  /**
-   * Mettre à jour les informations d'un utilisateur.
-   * PATCH /api/users/:id
-   */
-  public async update({ params, request, response }: HttpContext) {
-    try {
-      const user = await User.find(params.id)
-      if (!user) {
-        return response.notFound({ message: 'User not found' })
+      if (!email || !password || !name) {
+        return response.badRequest({ message: 'Missing required fields' })
       }
 
-      const data = request.only(['name', 'bio', 'photo'])
-      user.merge(data)
-      await user.save()
-      return response.ok(user)
-    } catch (error) {
-      return response.internalServerError({
-        message: 'Failed to update user',
-        error: error.message,
-      })
-    }
-  }
-
-  /**
-   * Supprimer un utilisateur.
-   * DELETE /api/users/:id
-   */
-  public async destroy({ params, response }: HttpContext) {
-    try {
-      const user = await User.find(params.id)
-      if (!user) {
-        return response.notFound({ message: 'User not found' })
+      const existingUser = await User.query().where('email', email).first()
+      if (existingUser) {
+        return response.conflict({ message: 'Email already in use' })
       }
 
-      await user.delete()
-      return response.ok({ message: 'User deleted successfully' })
+      const hashedPassword = await hash.make(password)
+      const user = await User.create({
+        email,
+        password: hashedPassword,
+        name,
+        bio,
+        provider: 'local',
+      })
+
+      return response.created({
+        message: 'User created successfully',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+      })
     } catch (error) {
       return response.internalServerError({
-        message: 'Failed to delete user',
+        message: 'Failed to create user',
         error: error.message,
       })
     }
