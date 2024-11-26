@@ -4,7 +4,7 @@ import { Model, DataTypes } from 'sequelize';
 export default (sequelize) => {
   class User extends Model {
     static associate(models) {
-      // Définir les relations
+      User.belongsTo(models.Role, { foreignKey: 'roleId', as: 'role' });
       // Ces relations resteront inactives pour l'instant
     }
   }
@@ -66,6 +66,8 @@ export default (sequelize) => {
       modelName: 'User',
     }
   );
+ 
+
 
   return User;
 };

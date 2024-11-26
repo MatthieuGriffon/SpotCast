@@ -2,6 +2,7 @@
 
 import Sequelize from 'sequelize';
 import User from './user.js';
+import Role from './role.js';
 import pkg from '../config/config.cjs';
 const { development, test, production } = pkg;
 
@@ -21,6 +22,7 @@ if (config.use_env_variable) {
 
 // Initialiser le modèle User
 db.User = User(sequelize, Sequelize.DataTypes);
+db.Role = Role(sequelize, Sequelize.DataTypes);
 
 // Configurer les associations
 Object.keys(db).forEach((modelName) => {

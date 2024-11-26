@@ -3,6 +3,8 @@ import baseRoute from './routes/baseRoute.js';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import authRoutes from './routes/auth.js';
+import { authenticateJWT } from './middlewares/authMiddleware.js';
 
 // Initialisation de l'application Express
 const app = express(); 
@@ -43,6 +45,12 @@ app.options('*', cors(corsOptions));
 
 // Utilisation des routes
 app.use('/', baseRoute);
+app.use('/auth', authRoutes);
+
+//Routes Protégées
+app.get('/protected', authenticateJWT, (req, res) => {
+  res.send(`Welcome, user with role: ${req.user.role}`);
+})
 
 // Export de l'application Express
 export default app;

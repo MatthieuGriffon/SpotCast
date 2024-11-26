@@ -1,8 +1,9 @@
-import 'dotenv/config'; // Charge automatiquement les variables d'environnement depuis .env
+import dotenv from 'dotenv';// Importe le module dotenv
 import app from './app.js'; // Importe l'application Express
 import db from '../models/index.js'; // Importe l'instance Sequelize configurée
 
 const PORT = process.env.PORT || 3000;
+dotenv.config();
 
 // Vérifie la connexion à la base de données et démarre le serveur
 async function startServer() {
