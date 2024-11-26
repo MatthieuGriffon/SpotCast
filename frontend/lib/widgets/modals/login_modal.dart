@@ -1,21 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class LoginModal extends StatefulWidget {
+import '../../utils/token_storage.dart'; // Pour storeAccessToken
+import '../../providers/auth_provider.dart'; // Pour authProvider
+
+class LoginModal extends ConsumerStatefulWidget {
   const LoginModal({super.key});
 
   @override
-  State<LoginModal> createState() => _LoginModalState();
+  ConsumerState<LoginModal> createState() => _LoginModalState();
 }
 
-class _LoginModalState extends State<LoginModal> {
+class _LoginModalState extends ConsumerState<LoginModal> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loginUser() async {
+    final String apiUrl = '${dotenv.get('API_BASE_URL')}/auth/login';
+
+    setState(() {
+      _isLoading = true;
+      });
+
+    try {
+      // Logique de requête POSTS
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        }),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // Stocker le token
+        await storeAccessToken(responseData['token']);
+
+        // Mettre à jour l'état global avec Riverpod
+        ref.read(authProvider.notifier).login(responseData['token']);
+
+        // Rediriger vers l'écran principal
+        Navigator.of(context).pushReplacementNamed('/spots');
+      } else {
+        _showMessage(responseData['message'] ?? 'Erreur lors de la connexion.');
+      }
+    } catch (e) {
+      _showMessage('Erreur réseau : ${e.toString()}');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showForgotPasswordDialog() {
@@ -52,7 +106,6 @@ class _LoginModalState extends State<LoginModal> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: SingleChildScrollView(
-        // Permet à la modal d'être scrollable si nécessaire
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -103,24 +156,26 @@ class _LoginModalState extends State<LoginModal> {
               ),
               const SizedBox(height: 12),
 
+              // Bouton de connexion
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+                onPressed: _isLoading ? null : _loginUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1B3A57),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 ),
-                child: const Text(
-                  'Se connecter',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        'Se connecter',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
               ),
               const SizedBox(height: 10),
 
