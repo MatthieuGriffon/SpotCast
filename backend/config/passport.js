@@ -41,6 +41,7 @@ passport.use(
             email,
             photo: profile.photos[0]?.value || null,
             roleId: defaultRole.id,
+            provider: 'google',
           });
 
           await db.FederatedCredential.create({

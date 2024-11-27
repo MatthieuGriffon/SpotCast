@@ -2,7 +2,7 @@ import express, { json, urlencoded } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { authenticateJWT } from './middlewares/authMiddleware.js';
+import { authenticateJWT, authorizeRole } from './middlewares/authMiddleware.js';
 // Importe les routes
 import baseRoute from './routes/baseRoute.js';
 import authRoutes from './routes/auth.js';
@@ -39,8 +39,11 @@ app.use(passport.initialize());
 console.log('Passport initialisé');
 
 app.use((err, req, res, next) => {
-  console.error('Erreur Passport :', err);
-  res.status(500).json({ message: 'Erreur Passport', error: err });
+  console.error('Erreur Passport :', err);
+  res.status(500).json({
+    message: 'Erreur Passport',
+    error: process.env.NODE_ENV === 'development' ? err : 'An error occurred',
+  });
 });
 // Ajoute Helmet en tant que middleware
 app.use(helmet({
@@ -63,6 +66,17 @@ app.use('/protected', protectedRoutes);
 app.get('/protected', authenticateJWT, (req, res) => {
   res.send(`Welcome, user with role: ${req.user.role}`);
 })
+app.get('/protected', authenticateJWT, (req, res) => {
+  res.send(`Welcome, user with role: ${req.user.role}`);
+});
+
+app.get('/admin', authenticateJWT, authorizeRole('admin'), (req, res) => {
+  res.send('Welcome, admin!');
+});
+
+app.get('/moderator', authenticateJWT, authorizeRole('moderator'), (req, res) => {
+  res.send('Welcome, moderator!');
+});
 
 // Export de l'application Express
 export default app;
