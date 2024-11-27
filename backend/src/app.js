@@ -1,10 +1,13 @@
 import express, { json, urlencoded } from 'express';
-import baseRoute from './routes/baseRoute.js';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
 import { authenticateJWT } from './middlewares/authMiddleware.js';
+// Importe les routes
+import baseRoute from './routes/baseRoute.js';
+import authRoutes from './routes/auth.js';
+import protectedRoutes from './routes/protected.js';
+import passport from '../config/passport.js';// Import de la configuration Passportconsole.log('Chargement de Passport terminé');
 
 // Initialisation de l'application Express
 const app = express(); 
@@ -31,6 +34,14 @@ dotenv.config();
 app.use(json()); // Analyse les requêtes JSON
 app.use(urlencoded({ extended: true })); // Analyse les requêtes URL-encoded
 
+// Initialiser Passport.js
+app.use(passport.initialize());
+console.log('Passport initialisé');
+
+app.use((err, req, res, next) => {
+  console.error('Erreur Passport :', err);
+  res.status(500).json({ message: 'Erreur Passport', error: err });
+});
 // Ajoute Helmet en tant que middleware
 app.use(helmet({
     contentSecurityPolicy: false,
@@ -46,6 +57,7 @@ app.options('*', cors(corsOptions));
 // Utilisation des routes
 app.use('/', baseRoute);
 app.use('/auth', authRoutes);
+app.use('/protected', protectedRoutes);
 
 //Routes Protégées
 app.get('/protected', authenticateJWT, (req, res) => {

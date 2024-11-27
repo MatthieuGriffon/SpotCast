@@ -3,12 +3,7 @@ import { Model, DataTypes } from 'sequelize';
 
 export default (sequelize) => {
   class Role extends Model {
-    /**
-     * Définir les associations
-     * Cette méthode est automatiquement appelée par le fichier models/index.js
-     */
     static associate(models) {
-      // Un rôle peut être associé à plusieurs utilisateurs
       Role.hasMany(models.User, { foreignKey: 'roleId', as: 'users' });
     }
   }

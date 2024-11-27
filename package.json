@@ -1,7 +1,6 @@
 {
   "name": "spotcast",
   "version": "1.0.0",
-  
   "scripts": {
     "start": "npm run dev:backend & npm run dev:frontend",
     "dev:backend": "start cmd /k \"cd backend && npm run dev\"",
@@ -10,5 +9,8 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
+  },
+  "dependencies": {
+    "passport-google-oidc": "^0.1.0"
   }
 }
