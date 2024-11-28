@@ -8,6 +8,8 @@ import baseRoute from './routes/baseRoute.js';
 import authRoutes from './routes/auth.js';
 import protectedRoutes from './routes/protected.js';
 import passport from '../config/passport.js';// Import de la configuration Passportconsole.log('Chargement de Passport terminé');
+import userRegisterRoutes from './routes/users/register.js';
+
 
 // Initialisation de l'application Express
 const app = express(); 
@@ -61,6 +63,11 @@ app.options('*', cors(corsOptions));
 app.use('/', baseRoute);
 app.use('/auth', authRoutes);
 app.use('/protected', protectedRoutes);
+
+// Point d'entrée pour toutes les routes des utilisateurs
+app.use('/users/register', userRegisterRoutes);
+
+
 
 //Routes Protégées
 app.get('/protected', authenticateJWT, (req, res) => {

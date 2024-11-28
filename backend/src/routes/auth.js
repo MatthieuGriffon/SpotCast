@@ -14,7 +14,6 @@ router.post('/refresh', refreshToken); // Endpoint pour régénérer le JWT
 router.post('/logout', logout); // Endpoint pour la déconnexion
 
 // Route pour démarrer l'authentification Google
-console.log('Route /auth/google configurée');
 router.get(
   '/google',
   passport.authenticate('google', { scope: ['profile', 'email'] }),
@@ -23,8 +22,7 @@ router.get(
     res.send('Authentification en cours...');
   }
 );
-console.log('Route /auth/google/callback configurée');
-// Callback après authentification réussie ou échec
+
 // Route pour gérer le callback Google
 router.get(
   '/google/callback',
@@ -45,7 +43,7 @@ router.get(
     console.log ('Fin de la requête sur /auth/google/callback', req.user, token);
   }
 );
-
+// Route pour gérer l'échec de l'authentification Google
 router.post('/refresh', async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) return res.status(400).json({ message: 'Refresh Token Required' });
@@ -64,7 +62,7 @@ router.post('/refresh', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
-// Gestion des échecs d'authentification
+// Route pour gérer la déconnexion
 router.get('/google/failure', (req, res) => {
   res.status(401).json({ message: 'Google Authentication Failed' });
 });

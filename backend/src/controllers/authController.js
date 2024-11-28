@@ -4,6 +4,8 @@ import { User, Role } from '../../models/index.js'; // Import explicite des modÃ
 import { validate as isUuid } from 'uuid';
 
 export const login = async (req, res) => {
+  console.log('User du authController :', User);
+console.log('MÃ©thodes sur User du authController :', Object.keys(User.prototype || {}));
   try {
     const { email, password } = req.body;
 

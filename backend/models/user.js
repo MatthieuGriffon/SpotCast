@@ -5,7 +5,6 @@ export default (sequelize) => {
   class User extends Model {
     static associate(models) {
       User.belongsTo(models.Role, { foreignKey: 'roleId', as: 'role' });
-      // Ces relations resteront inactives pour l'instant
     }
   }
 
@@ -20,45 +19,19 @@ export default (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        validate: {
-          isEmail: true,
-        },
+        validate: { isEmail: true },
       },
       password: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      bio: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-      },
-      photo: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      provider: {
-        type: DataTypes.ENUM('local', 'google', 'facebook'),
-        defaultValue: 'local',
-      },
-      providerId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      refreshToken: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      isActive: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true,
-      },
-      lastLoginAt: {
-        type: DataTypes.DATE,
-        allowNull: true,
+      roleId: {
+        type: DataTypes.UUID,
+        allowNull: false,
       },
     },
     {
@@ -66,8 +39,6 @@ export default (sequelize) => {
       modelName: 'User',
     }
   );
- 
-
 
   return User;
 };
