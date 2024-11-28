@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { authenticateJWT, authorizeRole } from './middlewares/authMiddleware.js';
+import  {generalLimiter } from './middlewares/rateLimiter.js'; // Import du middleware
 
 // Importe les routes
 import baseRoute from './routes/baseRoute.js';
@@ -10,6 +11,8 @@ import authRoutes from './routes/auth.js';
 import protectedRoutes from './routes/protected.js';
 import userRegisterRoutes from './routes/users/register.js';
 import userLoginRoutes from './routes/users/login.js';
+import passwordResetRoutes from './routes/users/passwordReset.js';
+import userProfileRoutes from './routes/users/profile.js';
 
 // Import de la configuration Passport
 import passport from '../config/passport.js';
@@ -32,7 +35,10 @@ const allowedOrigins = [
   };
 
 // Charge les variables d'environnement depuis .env
-dotenv.config(); 
+dotenv.config();
+
+// Applique le middleware de limitation
+app.use(generalLimiter);
 
 // Middlewares globaux
 app.use(json()); // Analyse les requêtes JSON
@@ -69,6 +75,8 @@ app.use('/users', userLoginRoutes);
 
 // Point d'entrée pour toutes les routes des utilisateurs
 app.use('/users/register', userRegisterRoutes);
+app.use('/users/password-reset', passwordResetRoutes);
+app.use('/users', userProfileRoutes);
 
 
 

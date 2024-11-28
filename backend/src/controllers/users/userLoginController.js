@@ -1,21 +1,29 @@
-import jwt from 'jsonwebtoken';
+import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
-import db from '../../../models/index.js'; // Import de tout db
+import jwt from 'jsonwebtoken';
+import db from '../../../models/index.js';
+
 const { User, Role } = db;
+
+export const validateLogin = [
+  body('email').isEmail().withMessage('Invalid email format'),
+  body('password').notEmpty().withMessage('Password is required'),
+];
 
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    // Vérification des champs
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+    // Validation des données d'entrée
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // Recherche de l'utilisateur
+    const { email, password } = req.body;
+
+    // Rechercher l'utilisateur
     const user = await User.findOne({
       where: { email },
-      include: [{ model: Role, as: 'role' }], // Associe le rôle de l'utilisateur
+      include: [{ model: Role, as: 'role' }],
     });
 
     if (!user) {
@@ -23,16 +31,15 @@ export const loginUser = async (req, res) => {
     }
 
     // Vérification du mot de passe
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid password' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Génération du token JWT
+    // Génération du JWT
     const payload = { id: user.id, role: user.role.name };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    // Réponse au client
     res.status(200).json({
       message: 'Login successful',
       token,

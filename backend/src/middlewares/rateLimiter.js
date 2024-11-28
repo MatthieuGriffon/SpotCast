@@ -1,14 +1,21 @@
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 
-// Limite les requêtes : max. 10 tentatives toutes les 15 minutes
-const loginLimiter = rateLimit({
+// Limitation générale
+const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limite chaque IP à 10 requêtes par fenêtre
-  message: {
-    error: 'Too many login attempts. Please try again after 15 minutes.',
-  },
-  standardHeaders: true, // Retourne RateLimit-* headers
-  legacyHeaders: false, // Désactive les X-RateLimit-* headers obsolètes
+  max: 50, // Limiter à 100 requêtes par IP toutes les 15 minutes
+  message: { message: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-export default loginLimiter;
+// Limitation stricte pour les tentatives sensibles comme la réinitialisation de mot de passe
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Seulement 5 tentatives de réinitialisation par IP
+  message: { message: 'Too many password reset attempts from this IP, please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export { generalLimiter, passwordResetLimiter };

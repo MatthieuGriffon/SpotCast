@@ -4,40 +4,31 @@ import { User, Role } from '../../models/index.js'; // Import explicite des mod�
 import { validate as isUuid } from 'uuid';
 
 export const login = async (req, res) => {
-  console.log('User du authController :', User);
-console.log('Méthodes sur User du authController :', Object.keys(User.prototype || {}));
   try {
     const { email, password } = req.body;
-
     // Vérification des champs
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
-
     // Recherche de l'utilisateur avec son rôle
     const user = await User.findOne({
       where: { email },
       include: [{ model: Role, as: 'role' }], // Associer le modèle `Role`
     });
-
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     // Vérifie le mot de passe
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid password' });
     }
-
     // Génération des tokens
     const payload = { id: user.id, role: user.role.name };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
     const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
-
     // Sauvegarde du refresh token
     await user.update({ refreshToken });
-
     // Réponse au client
     res.status(200).json({
       message: 'Login successful',
@@ -58,26 +49,21 @@ console.log('Méthodes sur User du authController :', Object.keys(User.prototype
 export const refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-
     if (!refreshToken) {
       return res.status(400).json({ message: 'Refresh token is required' });
     }
-
     // Vérification de la validité du refresh token
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-
     // Vérifie l'existence de l'utilisateur et du refresh token
     const user = await User.findByPk(decoded.id, {
       include: [{ model: Role, as: 'role' }], // Inclusion explicite du rôle
     });
-
     if (!user || user.refreshToken !== refreshToken) {
       return res.status(401).json({ message: 'Invalid refresh token' });
     }
 
     // Génération d'un nouveau JWT
     const newToken = jwt.sign({ id: user.id, role: user.role.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
     res.status(200).json({ token: newToken });
   } catch (error) {
     console.error(error);
