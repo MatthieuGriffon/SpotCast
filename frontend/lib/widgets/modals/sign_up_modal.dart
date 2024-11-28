@@ -32,8 +32,23 @@ class _SignUpModalState extends ConsumerState<SignUpModal> {
 
   Future<void> _registerUser(BuildContext context) async {
     final String apiUrl =
-        '${dotenv.get('API_BASE_URL', fallback: 'http://localhost:3333/api')}/users';
-
+        '${dotenv.get('API_BASE_URL', fallback: 'http://localhost:3000')}/users/register';
+    
+    bool isValidEmail(String email) {
+      final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+      return emailRegex.hasMatch(email);
+    }
+    bool isValidPassword(String password) {
+      return password.length >= 6;
+    }
+    if (!isValidEmail(_emailController.text)) {
+      _showMessage('Veuillez entrer un email valide.');
+      return;
+    }
+    if (!isValidPassword(_passwordController.text)) {
+      _showMessage('Le mot de passe doit contenir au moins 6 caractères.');
+      return;
+    }
     if (_passwordController.text != _confirmPasswordController.text) {
       _showMessage('Les mots de passe ne correspondent pas.');
       return;
@@ -65,7 +80,7 @@ class _SignUpModalState extends ConsumerState<SignUpModal> {
 
         if (mounted) {
           // Rediriger vers la page principale
-          Navigator.of(context).pushReplacementNamed('/dashboard');
+          Navigator.of(context).pushReplacementNamed('/profile');
         }
       } else {
         if (mounted) {

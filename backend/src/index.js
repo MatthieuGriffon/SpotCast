@@ -1,13 +1,13 @@
 import dotenv from 'dotenv'; // Charge les variables d'environnement
 import app from './app.js'; // Importe l'application Express
 import db from '../models/index.js'; // Importer l'objet `db` en tant qu'export par défaut
-
+import express from 'express'; // Importe le framework Express
 // Charger les variables d'environnement
 dotenv.config();
 
 // Définir le port du serveur
 const PORT = process.env.PORT || 3000;
-
+app.use(express.json()); 
 // Fonction pour démarrer le serveur
 async function startServer() {
   try {

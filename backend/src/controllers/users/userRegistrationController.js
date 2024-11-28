@@ -7,6 +7,8 @@ const { User, Role } = db;
 
 // Contrôleur pour l'inscription d'un utilisateur
 export const registerUser = async (req, res) => {
+  console.log('Route /users/register atteinte');
+    console.log('Données reçues :', req.body);
   try {
     // Récupération et validation des données du body
     const { email, name, password } = req.body;

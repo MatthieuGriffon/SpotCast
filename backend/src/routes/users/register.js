@@ -3,6 +3,9 @@ import { registerUser } from '../../controllers/users/userRegistrationController
 
 const router = express.Router();
 
-// Vérifier que la méthode POST est bien définie
-router.post('/', registerUser); // Notez l'usage de '/' ici
+router.post('/', (req, res, next) => {
+    console.log('Requête reçue sur /users/register');
+    next();
+  }, registerUser);
+  
 export default router;
