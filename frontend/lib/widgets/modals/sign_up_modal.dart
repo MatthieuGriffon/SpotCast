@@ -21,6 +21,12 @@ class _SignUpModalState extends ConsumerState<SignUpModal> {
       TextEditingController();
   bool _isLoading = false;
 
+  // Nouveau gestionnaire temporaire pour Google Sign-Up
+  void _handleGoogleSignUp() {
+    // Debug pour vérifier que le bouton fonctionne
+    print("Google Sign-Up button clicked!");
+  }
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -33,14 +39,16 @@ class _SignUpModalState extends ConsumerState<SignUpModal> {
   Future<void> _registerUser(BuildContext context) async {
     final String apiUrl =
         '${dotenv.get('API_BASE_URL', fallback: 'http://localhost:3000')}/users/register';
-    
+
     bool isValidEmail(String email) {
       final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
       return emailRegex.hasMatch(email);
     }
+
     bool isValidPassword(String password) {
       return password.length >= 6;
     }
+
     if (!isValidEmail(_emailController.text)) {
       _showMessage('Veuillez entrer un email valide.');
       return;
@@ -117,92 +125,136 @@ class _SignUpModalState extends ConsumerState<SignUpModal> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
                 'Inscription',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Nunito',
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Bouton "Continuer avec Google"
+              ElevatedButton.icon(
+                onPressed: _handleGoogleSignUp,
+                icon: Image.asset(
+                  'assets/icon/google_logo.png', // Remplacez par le chemin réel de votre logo Google
+                  height: 24,
+                  width: 24,
+                ),
+                label: const Text(
+                  'Continuer avec Google',
+                  style: TextStyle(fontSize: 10, fontFamily: 'Nunito'),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: Colors.grey),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 ),
               ),
               const SizedBox(height: 12),
               // Champ du nom d'utilisateur
               TextField(
                 controller: _usernameController,
-                style: const TextStyle(fontSize: 14, fontFamily: 'Nunito'),
+                style: const TextStyle(fontSize: 10, fontFamily: 'Nunito'),
                 decoration: InputDecoration(
                   labelText: 'Nom d\'utilisateur',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               // Champ d'email
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(fontSize: 14, fontFamily: 'Nunito'),
+                style: const TextStyle(fontSize: 10, fontFamily: 'Nunito'),
                 decoration: InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               // Champ de mot de passe
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                style: const TextStyle(fontSize: 14, fontFamily: 'Nunito'),
+                style: const TextStyle(fontSize: 10, fontFamily: 'Nunito'),
                 decoration: InputDecoration(
                   labelText: 'Mot de passe',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               // Champ de confirmation de mot de passe
               TextField(
                 controller: _confirmPasswordController,
                 obscureText: true,
-                style: const TextStyle(fontSize: 14, fontFamily: 'Nunito'),
+                style: const TextStyle(fontSize: 10, fontFamily: 'Nunito'),
                 decoration: InputDecoration(
                   labelText: 'Confirmer le mot de passe',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 8),
               // Bouton d'inscription
-              ElevatedButton(
-                onPressed: _isLoading ? null : () => _registerUser(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1B3A57),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'S\'inscrire',
-                        style: TextStyle(color: Colors.white, fontSize: 14),
-                      ),
-              ),
-              const SizedBox(height: 10),
-              // Bouton "Annuler"
               Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Annuler',
-                    style: TextStyle(fontSize: 12, color: Colors.blue),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment
+                      .center, // Centre les boutons horizontalement
+                  children: [
+                    // Bouton S'inscrire
+                    ElevatedButton(
+                      onPressed:
+                          _isLoading ? null : () => _registerUser(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1B3A57),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              'S\'inscrire',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 10),
+                            ),
+                    ),
+                    const SizedBox(width: 16), // Espace entre les deux boutons
+
+                    // Bouton Annuler
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.red, // Couleur rouge pour le bouton Annuler
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                      ),
+                      child: const Text(
+                        'Annuler',
+                        style: TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -60,6 +60,7 @@ flutter:
     - assets/images/image_slider03.webp
     - assets/icon/app_icon.png
     - assets/default/default_profile.png
+    - assets/icon/google_logo.png
     - .env
 
   fonts:
