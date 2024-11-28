@@ -3,13 +3,16 @@ import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { authenticateJWT, authorizeRole } from './middlewares/authMiddleware.js';
+
 // Importe les routes
 import baseRoute from './routes/baseRoute.js';
 import authRoutes from './routes/auth.js';
 import protectedRoutes from './routes/protected.js';
-import passport from '../config/passport.js';// Import de la configuration Passportconsole.log('Chargement de Passport terminé');
 import userRegisterRoutes from './routes/users/register.js';
+import userLoginRoutes from './routes/users/login.js';
 
+// Import de la configuration Passport
+import passport from '../config/passport.js';
 
 // Initialisation de l'application Express
 const app = express(); 
@@ -27,7 +30,6 @@ const allowedOrigins = [
     allowedHeaders: ['Content-Type', 'Authorization'], // En-têtes autorisés
     credentials: true, // Autorise l'envoi de cookies ou de headers comme Authorization
   };
-  
 
 // Charge les variables d'environnement depuis .env
 dotenv.config(); 
@@ -63,6 +65,7 @@ app.options('*', cors(corsOptions));
 app.use('/', baseRoute);
 app.use('/auth', authRoutes);
 app.use('/protected', protectedRoutes);
+app.use('/users', userLoginRoutes);
 
 // Point d'entrée pour toutes les routes des utilisateurs
 app.use('/users/register', userRegisterRoutes);
