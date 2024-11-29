@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import '../../utils/token_storage.dart'; // Pour storeAccessToken
 import '../../providers/auth_provider.dart'; // Pour authProvider
@@ -31,7 +32,7 @@ class _LoginModalState extends ConsumerState<LoginModal> {
 
     setState(() {
       _isLoading = true;
-      });
+    });
 
     try {
       // Logique de requête POSTS
@@ -64,6 +65,26 @@ class _LoginModalState extends ConsumerState<LoginModal> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  void _handleGoogleLogin() async {
+    try {
+      final url = "https://spotcast-dev.loca.lt/auth/google";
+      final result = await FlutterWebAuth2.authenticate(
+        url: url,
+        callbackUrlScheme: "com.example.spotcast",
+      );
+      final token = Uri.parse(result).queryParameters['token'];
+      if (token != null) {
+        await storeAccessToken(token);
+        ref.read(authProvider.notifier).login(token);
+        Navigator.of(context).pushReplacementNamed('/spots');
+      } else {
+        print("Échec de l'authentification via Google");
+      }
+    } catch (e) {
+      print("Erreur lors de l'authentification Google : $e");
     }
   }
 
@@ -110,14 +131,39 @@ class _LoginModalState extends ConsumerState<LoginModal> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
                 'Connexion',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Nunito',
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Bouton "Continuer avec Google"
+              ElevatedButton.icon(
+                onPressed: _handleGoogleLogin,
+                icon: Image.asset(
+                  'assets/icon/google_logo.png',
+                  height: 24,
+                  width: 24,
+                ),
+                label: const Text(
+                  'Continuer avec Google',
+                  style: TextStyle(fontSize: 10, fontFamily: 'Nunito'),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: Colors.grey),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 ),
               ),
               const SizedBox(height: 12),
@@ -126,10 +172,7 @@ class _LoginModalState extends ConsumerState<LoginModal> {
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'Nunito',
-                ),
+                style: const TextStyle(fontSize: 10, fontFamily: 'Nunito'),
                 decoration: InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(
@@ -137,16 +180,13 @@ class _LoginModalState extends ConsumerState<LoginModal> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
               // Champ de mot de passe
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'Nunito',
-                ),
+                style: const TextStyle(fontSize: 10, fontFamily: 'Nunito'),
                 decoration: InputDecoration(
                   labelText: 'Mot de passe',
                   border: OutlineInputBorder(
@@ -154,7 +194,7 @@ class _LoginModalState extends ConsumerState<LoginModal> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
               // Bouton de connexion
               ElevatedButton(
@@ -171,10 +211,7 @@ class _LoginModalState extends ConsumerState<LoginModal> {
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text(
                         'Se connecter',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 10),
                       ),
               ),
               const SizedBox(height: 10),
@@ -187,24 +224,6 @@ class _LoginModalState extends ConsumerState<LoginModal> {
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.blue,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // Bouton "Pas encore de compte ?"
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Pas encore de compte ? Inscrivez-vous',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                    ),
                   ),
                 ),
               ),
