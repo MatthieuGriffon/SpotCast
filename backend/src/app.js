@@ -1,4 +1,5 @@
 import express, { json, urlencoded } from 'express';
+import session from 'express-session';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -18,13 +19,31 @@ import userProfileRoutes from './routes/users/profile.js';
 import passport from '../config/passport.js';
 
 // Initialisation de l'application Express
-const app = express(); 
+const app = express();
+app.set('trust proxy', 1);
+
+// Configuration de la session
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'votre_secret_de_session',
+    resave: false, // Ne sauvegarde pas la session si elle n'est pas modifiée
+    saveUninitialized: false, // Ne crée pas une session si aucune donnée n'est sauvegardée
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // Utilise des cookies sécurisés en production
+      maxAge: 3600000, // Durée de validité : 1 heure
+    },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Liste des origines autorisées
 const allowedOrigins = [
     'http://localhost:9999',
     'http://127.0.0.1',
     'http://10.0.2.2',
+    'https://spotcast-dev.loca.lt',
   ]; 
 
   const corsOptions = {
@@ -38,7 +57,7 @@ const allowedOrigins = [
 dotenv.config();
 
 // Applique le middleware de limitation
-app.use(generalLimiter);
+//app.use(generalLimiter);
 
 // Middlewares globaux
 app.use(json()); // Analyse les requêtes JSON
@@ -47,6 +66,7 @@ app.use(urlencoded({ extended: true })); // Analyse les requêtes URL-encoded
 // Initialiser Passport.js
 app.use(passport.initialize());
 console.log('Passport initialisé');
+app.use(passport.session());
 
 app.use((err, req, res, next) => {
   console.error('Erreur Passport :', err);
@@ -56,10 +76,10 @@ app.use((err, req, res, next) => {
   });
 });
 // Ajoute Helmet en tant que middleware
-app.use(helmet({
-    contentSecurityPolicy: false,
-    frameguard: false,
-})); 
+//app.use(helmet({
+//    contentSecurityPolicy: false,
+//    frameguard: false,
+//})); 
 
 // Applique les règles CORS
 app.use(cors(corsOptions));
@@ -67,6 +87,11 @@ app.use(cors(corsOptions));
 // Active CORS pour toutes les routes
 app.options('*', cors(corsOptions));
 
+// 
+app.use((req, res, next) => {
+  console.log(`Requête reçue : ${req.method} ${req.url}`);
+  next();
+});
 // Utilisation des routes
 app.use('/', baseRoute);
 app.use('/auth', authRoutes);
@@ -94,6 +119,17 @@ app.get('/admin', authenticateJWT, authorizeRole('admin'), (req, res) => {
 
 app.get('/moderator', authenticateJWT, authorizeRole('moderator'), (req, res) => {
   res.send('Welcome, moderator!');
+});
+app._router.stack.forEach((middleware) => {
+  if (middleware.route) { // Vérifie si le middleware est une route
+    console.log(`Route définie : ${middleware.route.path}`);
+  } else if (middleware.name === 'router') { // Vérifie si le middleware est un routeur
+    middleware.handle.stack.forEach((handler) => {
+      if (handler.route) {
+        console.log(`Route définie : ${handler.route.path}`);
+      }
+    });
+  }
 });
 
 // Export de l'application Express

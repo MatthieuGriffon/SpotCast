@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../../providers//auth_provider.dart';
 import '../../utils/token_storage.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 class SignUpModal extends ConsumerStatefulWidget {
   const SignUpModal({super.key});
@@ -22,9 +23,22 @@ class _SignUpModalState extends ConsumerState<SignUpModal> {
   bool _isLoading = false;
 
   // Nouveau gestionnaire temporaire pour Google Sign-Up
-  void _handleGoogleSignUp() {
-    // Debug pour vérifier que le bouton fonctionne
-    print("Google Sign-Up button clicked!");
+  void _handleGoogleSignUp() async {
+    try {
+      final url = "https://spotcast-dev.loca.lt/auth/google";
+      final result = await FlutterWebAuth2.authenticate(
+        url: url,
+        callbackUrlScheme: "com.example.spotcast",
+      );
+      final token = Uri.parse(result).queryParameters['token'];
+      if (token != null) {
+        print("Authentification réussie, token : $token");
+      } else {
+        print("Échec de l'authentification");
+      }
+    } catch (e) {
+      print("Erreur lors de l'authentification : $e");
+    }
   }
 
   @override

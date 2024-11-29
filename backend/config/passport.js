@@ -59,6 +59,13 @@ passport.use(
     }
   )
 );
+// Sérialisation des données utilisateur pour la session
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
 
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
 
 export default passport;
