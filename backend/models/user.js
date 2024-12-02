@@ -34,6 +34,10 @@ export default (sequelize) => {
         type: DataTypes.UUID,
         allowNull: false,
       },
+      refreshToken: {
+        type: DataTypes.TEXT, // Permet de stocker des tokens longs
+        allowNull: true, // Peut être vide pour les utilisateurs non connectés
+      },
     },
     {
       sequelize,

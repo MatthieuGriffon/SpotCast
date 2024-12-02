@@ -55,7 +55,8 @@ const allowedOrigins = [
 
 // Charge les variables d'environnement depuis .env
 dotenv.config();
-
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
 // Applique le middleware de limitation
 //app.use(generalLimiter);
 
