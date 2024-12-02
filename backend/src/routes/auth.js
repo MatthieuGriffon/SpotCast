@@ -1,6 +1,8 @@
 import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import { generateAccessToken, generateRefreshToken } from '../utils/tokenUtils.js'; // Import des utils
+import { User, Role } from '../../models/index.js'; // Import du modèle User
 
 const router = express.Router();
 
@@ -16,18 +18,16 @@ router.get('/google/callback',
   (req, res) => {
     console.log('Callback Google reçu');
     
-    // Génération du token JWT
-    const token = jwt.sign(
-      { id: req.user.id, email: req.user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    // Récupérer les tokens de l'utilisateur
+    const { accessToken, refreshToken } = req.user;
 
-    // Redirection vers l'application Flutter avec le token
-    const redirectUrl = `com.example.spotcast://oauth2redirect?token=${token}`;
+    // Redirection vers l'application Flutter avec les tokens
+    const redirectUrl = `com.example.spotcast://oauth2redirect?accessToken=${accessToken}&refreshToken=${refreshToken}`;
     console.log('Redirection vers :', redirectUrl);
+
     res.redirect(redirectUrl);
   }
 );
+
 
 export default router;

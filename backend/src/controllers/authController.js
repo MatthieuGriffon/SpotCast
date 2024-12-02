@@ -46,28 +46,37 @@ export const login = async (req, res) => {
   }
 };
 
-export const refreshToken = async (req, res) => {
+export const refreshTokenHandler = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: 'Refresh Token is required' });
+  }
+
   try {
-    const { refreshToken } = req.body;
-    if (!refreshToken) {
-      return res.status(400).json({ message: 'Refresh token is required' });
-    }
-    // Vérification de la validité du refresh token
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    // Vérifie l'existence de l'utilisateur et du refresh token
-    const user = await User.findByPk(decoded.id, {
-      include: [{ model: Role, as: 'role' }], // Inclusion explicite du rôle
-    });
-    if (!user || user.refreshToken !== refreshToken) {
-      return res.status(401).json({ message: 'Invalid refresh token' });
+    const payload = verifyRefreshToken(refreshToken);
+
+    // Rechercher l'utilisateur
+    const user = await User.findOne({ where: { id: payload.id, refreshToken } });
+    if (!user) {
+      return res.status(403).json({ message: 'Invalid Refresh Token' });
     }
 
-    // Génération d'un nouveau JWT
-    const newToken = jwt.sign({ id: user.id, role: user.role.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ token: newToken });
+    // Générer de nouveaux tokens
+    const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+
+    // Mettre à jour le Refresh Token dans la base de données
+    await user.update({ refreshToken: newRefreshToken });
+
+    // Renvoyer les nouveaux tokens
+    res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
   } catch (error) {
-    console.error(error);
-    res.status(403).json({ message: 'Invalid or expired refresh token' });
+    console.error('Error refreshing token:', error);
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Refresh Token has expired' });
+    }
+    res.status(403).json({ message: 'Invalid Refresh Token' });
   }
 };
 

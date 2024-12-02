@@ -2,6 +2,8 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'; // Import correct de GoogleStrategy
 import { User, Role, FederatedCredential } from '../models/index.js';// Import des modèles Sequelize
 import db from '../models/index.js';// Importe le registre des modèles Sequelize avec destructuration
+import { generateAccessToken, generateRefreshToken } from '../../backend/src/utils/tokenUtils.js';
+
 console.log('Chargement de passport.js');
 
 // Vérification que les modèles sont correctement chargés
@@ -51,6 +53,22 @@ passport.use(
           });
         }
 
+        // Générer les tokens
+        const generatedAccessToken = generateAccessToken(user);
+        const generatedRefreshToken = generateRefreshToken(user);
+
+        // Mettre à jour le Refresh Token dans la base de données
+        await user.update({ refreshToken: generatedRefreshToken });
+
+        console.log('Tokens générés et mis à jour :', {
+          accessToken: generatedAccessToken,
+          refreshToken: generatedRefreshToken,
+        });
+
+        // Attacher les tokens à l'utilisateur (pour l'utiliser plus tard dans le callback)
+        user.accessToken = generatedAccessToken;
+        user.refreshToken = generatedRefreshToken;
+
         return done(null, user);
       } catch (err) {
         console.error('Erreur pendant la vérification de Google :', err);
@@ -59,6 +77,7 @@ passport.use(
     }
   )
 );
+
 // Sérialisation des données utilisateur pour la session
 passport.serializeUser((user, done) => {
   done(null, user);
