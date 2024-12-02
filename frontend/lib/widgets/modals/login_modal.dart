@@ -28,45 +28,51 @@ class _LoginModalState extends ConsumerState<LoginModal> {
   }
 
   Future<void> _loginUser() async {
-    final String apiUrl = '${dotenv.get('API_BASE_URL')}/auth/login';
+  final String apiUrl = '${dotenv.get('API_BASE_URL')}/users/login';
 
-    setState(() {
-      _isLoading = true;
-    });
+  setState(() {
+    _isLoading = true;
+  });
 
-    try {
-      // Logique de requête POSTS
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text,
-          'password': _passwordController.text,
-        }),
-      );
+  try {
+    print('URL: $apiUrl');
+    print('Email: ${_emailController.text}, Password: ${_passwordController.text}');
 
-      final responseData = jsonDecode(response.body);
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      }),
+    );
 
-      if (response.statusCode == 200) {
-        // Stocker le token
-        await storeAccessToken(responseData['token']);
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
 
-        // Mettre à jour l'état global avec Riverpod
-        ref.read(authProvider.notifier).login(responseData['token']);
+    final responseData = jsonDecode(response.body);
 
-        // Rediriger vers l'écran principal
-        Navigator.of(context).pushReplacementNamed('/spots');
-      } else {
-        _showMessage(responseData['message'] ?? 'Erreur lors de la connexion.');
-      }
-    } catch (e) {
-      _showMessage('Erreur réseau : ${e.toString()}');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    if (response.statusCode == 200) {
+      // Stocker le token
+      await storeAccessToken(responseData['accessToken']);
+
+      // Mettre à jour l'état global avec Riverpod
+      ref.read(authProvider.notifier).login(responseData['accessToken']);
+
+      // Rediriger vers l'écran principal
+      Navigator.of(context).pushReplacementNamed('/spots');
+    } else {
+      _showMessage(responseData['message'] ?? 'Erreur lors de la connexion.');
     }
+  } catch (e) {
+    print('Erreur: $e');
+    _showMessage('Erreur réseau : ${e.toString()}');
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
 
   void _handleGoogleLogin() async {
     try {
